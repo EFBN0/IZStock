@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:izstock/screens/main_navigation_screen.dart';
+import 'package:izstock/pages/main_navigation.dart';
 import 'package:izstock/styles/theme.dart';
 
 void main() {

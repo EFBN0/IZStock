@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:izstock/screens/dashboard_screen.dart';
-import 'package:izstock/screens/settings_screen.dart';
-import 'package:izstock/screens/stash_screen.dart';
-import 'package:izstock/screens/transaction_screen.dart';
+import 'package:izstock/pages/dashboard.dart';
+import 'package:izstock/pages/configuracoes.dart';
+import 'package:izstock/pages/estoque/estoque.dart';
+import 'package:izstock/pages/vendas.dart';
 
 class ScreenNavigationItem {
   const ScreenNavigationItem({
@@ -32,8 +32,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
   final List<ScreenNavigationItem> _screens = [
     const ScreenNavigationItem(
-      screen: StashScreen(),
-      title: 'Gerenciamento de estoque',
+      screen: EstoquePage(),
+      title: 'Meus estoques',
       label: 'Estoque',
       icon: Icon(Icons.warehouse),
     ),
@@ -60,7 +60,12 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(_screens[_selectedScreenIndex].title)),
+      appBar: AppBar(
+        elevation: 5.0,
+        shadowColor: const Color.fromARGB(255, 0, 0, 0).withValues(alpha: 0.5),
+        centerTitle: true,
+        title: Text(_screens[_selectedScreenIndex].title),
+      ),
       body: _screens[_selectedScreenIndex].screen,
       bottomNavigationBar: BottomNavigationBar(
         onTap: (index) {
