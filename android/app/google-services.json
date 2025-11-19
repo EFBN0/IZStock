@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1016768731650",
+    "project_id": "iz-stock-app",
+    "storage_bucket": "iz-stock-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1016768731650:android:af761f9e56f67c0e93e51b",
+        "android_client_info": {
+          "package_name": "com.example.izstock"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC5hQFfKpZEgq6qg2o6gPpxGxaxfgsWyR0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

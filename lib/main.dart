@@ -1,8 +1,14 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:izstock/pages/auth/auth.dart';
 import 'package:izstock/pages/main_navigation.dart';
 import 'package:izstock/styles/theme.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const App());
 }
 
@@ -11,6 +17,18 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(theme: theme, home: const MainNavigationScreen());
+    return MaterialApp(
+      theme: theme,
+      home: StreamBuilder(
+        stream: FirebaseAuth.instance.authStateChanges(),
+        builder: (ctx, snapshot) {
+          if (snapshot.hasData) {
+            return const MainNavigationScreen();
+          }
+
+          return const AuthScreen();
+        },
+      ),
+    );
   }
 }

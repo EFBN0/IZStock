@@ -38,7 +38,7 @@ final ThemeData theme = ThemeData(
       backgroundColor: kColorSchemeEscuro.primary,
       foregroundColor: kColorSchemeEscuro.onPrimary,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8.0),
+        borderRadius: BorderRadius.circular(16.0),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
     ),
@@ -48,12 +48,10 @@ final ThemeData theme = ThemeData(
     filled: true,
     fillColor: kColorSchemeEscuro.surfaceContainerHighest.withValues(alpha: 0.5),
     border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(8.0),
-      borderSide: BorderSide.none,
+      borderRadius: BorderRadius.circular(16.0),
     ),
     focusedBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(8.0),
-      borderSide: BorderSide(color: kColorSchemeEscuro.primary),
+      borderRadius: BorderRadius.circular(16.0),
     ),
   ),
 

@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:izstock/pages/dashboard.dart';
 import 'package:izstock/pages/configuracoes.dart';
@@ -65,6 +66,17 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         shadowColor: const Color.fromARGB(255, 0, 0, 0).withValues(alpha: 0.5),
         centerTitle: true,
         title: Text(_screens[_selectedScreenIndex].title),
+        actions: [
+          IconButton(
+            onPressed: () {
+              FirebaseAuth.instance.signOut();
+            },
+            icon: Icon(
+              Icons.exit_to_app,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+          ),
+        ],
       ),
       body: _screens[_selectedScreenIndex].screen,
       bottomNavigationBar: BottomNavigationBar(
