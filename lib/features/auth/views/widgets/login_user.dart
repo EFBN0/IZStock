@@ -3,21 +3,20 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 final _firebase = FirebaseAuth.instance;
 
-class Register extends StatefulWidget {
-  const Register({super.key});
+class Login extends StatefulWidget {
+  const Login({super.key});
 
   @override
-  State<Register> createState() {
-    return _RegisterState();
+  State<Login> createState() {
+    return _LoginState();
   }
 }
 
-class _RegisterState extends State<Register> {
+class _LoginState extends State<Login> {
   final _form = GlobalKey<FormState>();
 
   var _enteredEmail = '';
   var _enteredPassword = '';
-  var _enteredConfirmedPassword = '';
 
   void _unfocus() {
     FocusManager.instance.primaryFocus?.unfocus();
@@ -32,23 +31,15 @@ class _RegisterState extends State<Register> {
 
     _form.currentState!.save();
 
-    if (_enteredPassword != _enteredConfirmedPassword) {
-      ScaffoldMessenger.of(context).clearSnackBars();
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('As senhas não coincidem')));
-      return;
-    }
-
     try {
-      final userCredentials = await _firebase.createUserWithEmailAndPassword(
+      await _firebase.signInWithEmailAndPassword(
         email: _enteredEmail,
         password: _enteredPassword,
       );
     } on FirebaseAuthException catch (error) {
       ScaffoldMessenger.of(context).clearSnackBars();
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error.message ?? 'Falha ao se cadastrar')),
+        SnackBar(content: Text(error.message ?? 'Falha ao autentiar usuário')),
       );
     }
   }
@@ -64,7 +55,10 @@ class _RegisterState extends State<Register> {
             onTapOutside: (event) {
               _unfocus();
             },
-            decoration: InputDecoration(labelText: 'Email', filled: false),
+            decoration: InputDecoration(
+              labelText: 'Email',
+              filled: false,
+            ),
             keyboardType: TextInputType.emailAddress,
             autocorrect: false,
             textCapitalization: TextCapitalization.none,
@@ -74,34 +68,19 @@ class _RegisterState extends State<Register> {
                   !value.contains('@')) {
                 return 'Digite um email válido';
               }
+              return null;
             },
             onSaved: (value) {
               _enteredEmail = value!;
             },
           ),
-          const SizedBox(height: 14),
-          TextFormField(
-            onTapOutside: (event) {
-              _unfocus();
-            },
-            decoration: InputDecoration(labelText: 'Senha', filled: false),
-            obscureText: true,
-            validator: (value) {
-              if (value == null || value.trim().length < 6) {
-                return 'Senha deve ter pelo menos 6 caracteres';
-              }
-            },
-            onSaved: (value) {
-              _enteredPassword = value!;
-            },
-          ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 14,),
           TextFormField(
             onTapOutside: (event) {
               _unfocus();
             },
             decoration: InputDecoration(
-              labelText: 'Confirme sua senha',
+              labelText: 'Senha',
               filled: false,
             ),
             obscureText: true,
@@ -109,9 +88,10 @@ class _RegisterState extends State<Register> {
               if (value == null || value.trim().length < 6) {
                 return 'Senha deve ter pelo menos 6 caracteres';
               }
+              return null;
             },
             onSaved: (value) {
-              _enteredConfirmedPassword = value!;
+              _enteredPassword = value!;
             },
           ),
           const SizedBox(height: 20),
@@ -123,7 +103,7 @@ class _RegisterState extends State<Register> {
               foregroundColor: Theme.of(context).colorScheme.primaryContainer,
               textStyle: TextStyle(fontSize: 24),
             ),
-            child: Text('Cadastrar'),
+            child: Text('Entrar'),
           ),
         ],
       ),

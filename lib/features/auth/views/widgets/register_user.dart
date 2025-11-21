@@ -3,20 +3,21 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 final _firebase = FirebaseAuth.instance;
 
-class Login extends StatefulWidget {
-  const Login({super.key});
+class Register extends StatefulWidget {
+  const Register({super.key});
 
   @override
-  State<Login> createState() {
-    return _LoginState();
+  State<Register> createState() {
+    return _RegisterState();
   }
 }
 
-class _LoginState extends State<Login> {
+class _RegisterState extends State<Register> {
   final _form = GlobalKey<FormState>();
 
   var _enteredEmail = '';
   var _enteredPassword = '';
+  var _enteredConfirmedPassword = '';
 
   void _unfocus() {
     FocusManager.instance.primaryFocus?.unfocus();
@@ -31,15 +32,23 @@ class _LoginState extends State<Login> {
 
     _form.currentState!.save();
 
+    if (_enteredPassword != _enteredConfirmedPassword) {
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('As senhas não coincidem')));
+      return;
+    }
+
     try {
-      final userCredentials = await _firebase.signInWithEmailAndPassword(
+      await _firebase.createUserWithEmailAndPassword(
         email: _enteredEmail,
         password: _enteredPassword,
       );
     } on FirebaseAuthException catch (error) {
       ScaffoldMessenger.of(context).clearSnackBars();
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error.message ?? 'Falha ao autentiar usuário')),
+        SnackBar(content: Text(error.message ?? 'Falha ao se cadastrar')),
       );
     }
   }
@@ -55,10 +64,7 @@ class _LoginState extends State<Login> {
             onTapOutside: (event) {
               _unfocus();
             },
-            decoration: InputDecoration(
-              labelText: 'Email',
-              filled: false,
-            ),
+            decoration: InputDecoration(labelText: 'Email', filled: false),
             keyboardType: TextInputType.emailAddress,
             autocorrect: false,
             textCapitalization: TextCapitalization.none,
@@ -68,18 +74,36 @@ class _LoginState extends State<Login> {
                   !value.contains('@')) {
                 return 'Digite um email válido';
               }
+              return null;
             },
             onSaved: (value) {
               _enteredEmail = value!;
             },
           ),
-          const SizedBox(height: 14,),
+          const SizedBox(height: 14),
+          TextFormField(
+            onTapOutside: (event) {
+              _unfocus();
+            },
+            decoration: InputDecoration(labelText: 'Senha', filled: false),
+            obscureText: true,
+            validator: (value) {
+              if (value == null || value.trim().length < 6) {
+                return 'Senha deve ter pelo menos 6 caracteres';
+              }
+              return null;
+            },
+            onSaved: (value) {
+              _enteredPassword = value!;
+            },
+          ),
+          const SizedBox(height: 14),
           TextFormField(
             onTapOutside: (event) {
               _unfocus();
             },
             decoration: InputDecoration(
-              labelText: 'Senha',
+              labelText: 'Confirme sua senha',
               filled: false,
             ),
             obscureText: true,
@@ -87,9 +111,10 @@ class _LoginState extends State<Login> {
               if (value == null || value.trim().length < 6) {
                 return 'Senha deve ter pelo menos 6 caracteres';
               }
+              return null;
             },
             onSaved: (value) {
-              _enteredPassword = value!;
+              _enteredConfirmedPassword = value!;
             },
           ),
           const SizedBox(height: 20),
@@ -101,7 +126,7 @@ class _LoginState extends State<Login> {
               foregroundColor: Theme.of(context).colorScheme.primaryContainer,
               textStyle: TextStyle(fontSize: 24),
             ),
-            child: Text('Entrar'),
+            child: Text('Cadastrar'),
           ),
         ],
       ),

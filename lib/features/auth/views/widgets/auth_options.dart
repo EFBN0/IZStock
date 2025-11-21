@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:izstock/pages/auth/auth.dart';
+import 'package:izstock/features/auth/views/auth_page.dart';
 
 class AuthOptions extends StatelessWidget {
   const AuthOptions({super.key, required this.onPageModeChange});
 
-  final void Function(AuthScreenModeEnum) onPageModeChange;
+  final void Function(AuthPageModeEnum) onPageModeChange;
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +15,7 @@ class AuthOptions extends StatelessWidget {
             Expanded(
               child: TextButton(
                 onPressed: () {
-                  onPageModeChange(AuthScreenModeEnum.login);
+                  onPageModeChange(AuthPageModeEnum.login);
                 },
                 style: TextButton.styleFrom(
                   foregroundColor: Theme.of(
@@ -44,7 +44,7 @@ class AuthOptions extends StatelessWidget {
             Expanded(
               child: TextButton(
                 onPressed: () {
-                  onPageModeChange(AuthScreenModeEnum.register);
+                  onPageModeChange(AuthPageModeEnum.register);
                 },
                 style: TextButton.styleFrom(
                   backgroundColor: Theme.of(

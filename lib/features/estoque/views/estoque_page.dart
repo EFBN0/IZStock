@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:izstock/data/estoque_mock.dart';
-import 'package:izstock/models/estoque.dart';
-import 'package:izstock/pages/estoque/estoque_details.dart';
+import 'package:izstock/features/estoque/data/estoque_mock.dart';
+import 'package:izstock/features/estoque/models/estoque.dart';
+import 'package:izstock/features/estoque/views/widgets/estoque_details.dart';
 
 class EstoquePage extends StatefulWidget {
   const EstoquePage({super.key});

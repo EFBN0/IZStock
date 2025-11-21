@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:izstock/models/estoque.dart';
-import 'package:izstock/models/mercadoria.dart';
+import 'package:izstock/features/estoque/models/estoque.dart';
+import 'package:izstock/features/estoque/models/mercadoria.dart';
 
 class EstoqueDetailsPage extends StatelessWidget {
   const EstoqueDetailsPage({super.key, required this.estoque});

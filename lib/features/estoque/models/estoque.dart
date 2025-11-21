@@ -1,4 +1,4 @@
-import 'package:izstock/models/mercadoria.dart';
+import 'package:izstock/features/estoque/models/mercadoria.dart';
 
 class Estoque {
   const Estoque({

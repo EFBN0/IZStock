@@ -1,23 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:izstock/widgets/auth/auth_options.dart';
-import 'package:izstock/widgets/auth/login_user.dart';
-import 'package:izstock/widgets/auth/register_user.dart';
+import 'package:izstock/features/auth/views/widgets/auth_options.dart';
+import 'package:izstock/features/auth/views/widgets/login_user.dart';
+import 'package:izstock/features/auth/views/widgets/register_user.dart';
 
-enum AuthScreenModeEnum { initial, login, register }
+enum AuthPageModeEnum { initial, login, register }
 
-class AuthScreen extends StatefulWidget {
-  const AuthScreen({super.key});
+class AuthPage extends StatefulWidget {
+  const AuthPage({super.key});
 
   @override
-  State<AuthScreen> createState() {
-    return _AuthScreenState();
+  State<AuthPage> createState() {
+    return _AuthPageState();
   }
 }
 
-class _AuthScreenState extends State<AuthScreen> {
-  var _pageMode = AuthScreenModeEnum.initial;
+class _AuthPageState extends State<AuthPage> {
+  var _pageMode = AuthPageModeEnum.initial;
 
-  void _setPageMode(AuthScreenModeEnum pageMode) {
+  void _setPageMode(AuthPageModeEnum pageMode) {
     setState(() {
       _pageMode = pageMode;
     });
@@ -28,15 +28,15 @@ class _AuthScreenState extends State<AuthScreen> {
     Widget authNavigationOption;
     Widget mainContent;
 
-    if (_pageMode == AuthScreenModeEnum.login) {
+    if (_pageMode == AuthPageModeEnum.login) {
       authNavigationOption = TextButton(onPressed: () {
-        _setPageMode(AuthScreenModeEnum.register);
+        _setPageMode(AuthPageModeEnum.register);
       }, child: Text('Ainda não possui uma conta? Cadastre-se!'));
 
       mainContent = Login();
-    } else if (_pageMode == AuthScreenModeEnum.register) {
+    } else if (_pageMode == AuthPageModeEnum.register) {
       authNavigationOption = TextButton(onPressed: () {
-        _setPageMode(AuthScreenModeEnum.login);
+        _setPageMode(AuthPageModeEnum.login);
       }, child: Text('Já possuo uma conta!'));
 
       mainContent = Register();
@@ -71,7 +71,7 @@ class _AuthScreenState extends State<AuthScreen> {
                 ),
                 const SizedBox(height: 40),
                 SingleChildScrollView(child: mainContent),
-                if (_pageMode != AuthScreenModeEnum.initial)
+                if (_pageMode != AuthPageModeEnum.initial)
                   const SizedBox(height: 10,),
                 authNavigationOption
               ],

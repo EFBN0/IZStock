@@ -1,5 +1,5 @@
-import 'package:izstock/models/estoque.dart';
-import 'package:izstock/models/mercadoria.dart';
+import 'package:izstock/features/estoque/models/estoque.dart';
+import 'package:izstock/features/estoque/models/mercadoria.dart';
 
 const List<Mercadoria> kMercadoriasLivros = [
   Mercadoria(

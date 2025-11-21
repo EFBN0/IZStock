@@ -1,8 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:izstock/pages/auth/auth.dart';
-import 'package:izstock/pages/main_navigation.dart';
-import 'package:izstock/styles/theme.dart';
+import 'package:izstock/features/auth/views/auth_page.dart';
+import 'package:izstock/core/main_navigation.dart';
+import 'package:izstock/core/styles/theme.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 
@@ -26,7 +26,7 @@ class App extends StatelessWidget {
             return const MainNavigationScreen();
           }
 
-          return const AuthScreen();
+          return const AuthPage();
         },
       ),
     );

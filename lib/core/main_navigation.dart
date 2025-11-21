@@ -1,9 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:izstock/pages/dashboard.dart';
-import 'package:izstock/pages/configuracoes.dart';
-import 'package:izstock/pages/estoque/estoque.dart';
-import 'package:izstock/pages/vendas.dart';
+import 'package:izstock/features/dashboard/dashboard.dart';
+import 'package:izstock/features/configuracoes/configuracoes.dart';
+import 'package:izstock/features/estoque/views/estoque_page.dart';
+import 'package:izstock/features/vendas/vendas.dart';
 
 class ScreenNavigationItem {
   const ScreenNavigationItem({
