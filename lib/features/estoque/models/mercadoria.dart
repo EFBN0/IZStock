@@ -1,15 +1,49 @@
-class Mercadoria {
-  const Mercadoria({
-    required this.id,
-    required this.titulo,
-    required this.descricao,
-    required this.valor,
-    this.imagemUrl
-  });
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-  final int id;
+class Mercadoria {
+  final String id;
+  final String estoqueId;
   final String titulo;
   final String descricao;
-  final double valor;
+  final double valorVenda;
+  final double valorCusto;
+  final int quantidade;
   final String? imagemUrl;
+
+  const Mercadoria({
+    required this.id,
+    required this.estoqueId,
+    required this.titulo,
+    required this.descricao,
+    required this.valorVenda,
+    required this.valorCusto,
+    required this.quantidade,
+    this.imagemUrl,
+  });
+
+  factory Mercadoria.fromFirestore(DocumentSnapshot doc) {
+    final data = doc.data() as Map<String, dynamic>;
+    return Mercadoria(
+      id: doc.id,
+      estoqueId: data['estoqueId'] ?? '',
+      titulo: data['titulo'] ?? '',
+      descricao: data['descricao'] ?? '',
+      valorVenda: (data['valorVenda'] ?? 0.0).toDouble(),
+      valorCusto: (data['valorCusto'] ?? 0.0).toDouble(),
+      quantidade: data['quantidade'] ?? 0,
+      imagemUrl: data['imagemUrl'],
+    );
+  }
+
+  Map<String, dynamic> toFirestore() {
+    return {
+      'estoqueId': estoqueId,
+      'titulo': titulo,
+      'descricao': descricao,
+      'valorVenda': valorVenda,
+      'precoCusto': valorCusto,
+      'quantidade': quantidade,
+      'imagemUrl': imagemUrl,
+    };
+  }
 }

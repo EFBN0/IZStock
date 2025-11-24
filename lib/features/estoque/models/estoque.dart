@@ -1,13 +1,29 @@
-import 'package:izstock/features/estoque/models/mercadoria.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Estoque {
+  final String? id;
+  final String titulo;
+  final int quantidadeItens;
+
   const Estoque({
-    required this.id,
     required this.titulo,
-    required this.mercadorias,
+    this.id,
+    this.quantidadeItens = 0,
   });
 
-  final int id;
-  final String titulo;
-  final List<Mercadoria> mercadorias;
+  factory Estoque.fromFirestore(DocumentSnapshot doc) {
+    final data = doc.data() as Map<String, dynamic>;
+    return Estoque(
+      id: doc.id,
+      titulo: data['titulo'] ?? '',
+      quantidadeItens: data['quantidadeItens'] ?? 0,
+    );
+  }
+
+  Map<String, dynamic> toFirestore() {
+    return {
+      'titulo': titulo,
+      'quantidadeItens': quantidadeItens,
+    };
+  }
 }

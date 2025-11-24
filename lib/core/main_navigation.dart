@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:izstock/features/dashboard/dashboard.dart';
 import 'package:izstock/features/configuracoes/configuracoes.dart';
-import 'package:izstock/features/estoque/views/estoque_page.dart';
+import 'package:izstock/features/estoque/views/pages/estoques_page.dart';
 import 'package:izstock/features/vendas/vendas.dart';
 
 class ScreenNavigationItem {
@@ -33,7 +33,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
   final List<ScreenNavigationItem> _screens = [
     const ScreenNavigationItem(
-      screen: EstoquePage(),
+      screen: EstoquesPage(),
       title: 'Meus estoques',
       label: 'Estoque',
       icon: Icon(Icons.warehouse),

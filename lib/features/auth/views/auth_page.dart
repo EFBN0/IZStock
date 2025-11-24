@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:izstock/features/auth/views/widgets/auth_options.dart';
+import 'package:izstock/features/auth/views/widgets/auth_page_options_wrapper.dart';
 import 'package:izstock/features/auth/views/widgets/login_user.dart';
 import 'package:izstock/features/auth/views/widgets/register_user.dart';
 
@@ -42,7 +42,7 @@ class _AuthPageState extends State<AuthPage> {
       mainContent = Register();
     } else {
       authNavigationOption = const SizedBox.shrink();
-      mainContent = AuthOptions(onPageModeChange: _setPageMode);
+      mainContent = AuthPageOptionsWrapper(onPageModeChange: _setPageMode);
     }
 
     return Scaffold(

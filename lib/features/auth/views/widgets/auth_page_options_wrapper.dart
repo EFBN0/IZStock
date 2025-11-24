@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:izstock/features/auth/views/auth_page.dart';
 
-class AuthOptions extends StatelessWidget {
-  const AuthOptions({super.key, required this.onPageModeChange});
+class AuthPageOptionsWrapper extends StatelessWidget {
+  const AuthPageOptionsWrapper({super.key, required this.onPageModeChange});
 
   final void Function(AuthPageModeEnum) onPageModeChange;
 
