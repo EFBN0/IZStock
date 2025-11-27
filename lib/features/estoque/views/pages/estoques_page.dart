@@ -113,7 +113,7 @@ class EstoquesPage extends ConsumerWidget {
                   child: EstoqueCard(
                     estoque: estoques[index],
                     onDelete: ref
-                        .read(estoqueControllerProvider.notifier)
+                        .watch(estoqueControllerProvider.notifier)
                         .removeEstoque,
                   ),
                 ),

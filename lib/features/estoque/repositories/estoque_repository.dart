@@ -27,11 +27,21 @@ class EstoqueRepository extends BaseRepository {
     await _estoqueRef.add(novoEstoque);
   }
 
-  Future<void> updateEstoque(String estoqueId, Map<String, dynamic> data) async {
+  Future<void> updateEstoque(
+    String estoqueId,
+    Map<String, dynamic> data,
+  ) async {
     await _estoqueRef.doc(estoqueId).update(data);
   }
 
   Future<void> removeEstoque(String estoqueId) async {
     await _estoqueRef.doc(estoqueId).delete();
+  }
+
+  Future<void> updateQuantidadeItens(String estoqueId, {int? quantidade, required bool incrementar}) async {
+    final qtdToSave = quantidade ?? 1;
+    await _estoqueRef.doc(estoqueId).update({
+      'quantidadeItens': FieldValue.increment(incrementar ? qtdToSave : qtdToSave * -1),
+    });
   }
 }

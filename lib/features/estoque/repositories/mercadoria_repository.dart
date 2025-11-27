@@ -19,20 +19,20 @@ class MercadoriaRepository extends BaseRepository {
   }
 
   Stream<List<Mercadoria>> findMercadoriasByEstoque(String estoqueId) {
-    return _getMercadoriaRef(estoqueId)
-        .orderBy('titulo')
-        .snapshots()
-        .map((snapshot) {
-          return snapshot.docs.map((doc) => doc.data()).toList();
-        });
+    return _getMercadoriaRef(estoqueId).orderBy('titulo').snapshots().map((
+      snapshot,
+    ) {
+      return snapshot.docs.map((doc) => doc.data()).toList();
+    });
   }
 
-  Future<List<Mercadoria>> buscarMercadorias(String termoBusca) async {
-    if (termoBusca.isEmpty) return [];
-    
-    final query = firestore.collectionGroup('mercadorias')
-        .where('titulo', isGreaterThanOrEqualTo: termoBusca)
-        .where('titulo', isLessThan: '$termoBusca\uf8ff')
+  Future<List<Mercadoria>> findMercadoriasByText(String text) async {
+    if (text.isEmpty) return [];
+
+    final query = firestore
+        .collectionGroup('mercadorias')
+        .where('titulo', isGreaterThanOrEqualTo: text)
+        .where('titulo', isLessThan: '$text\uf8ff')
         .withConverter<Mercadoria>(
           fromFirestore: (snapshot, _) => Mercadoria.fromFirestore(snapshot),
           toFirestore: (mercadoria, _) => mercadoria.toFirestore(),
@@ -43,32 +43,51 @@ class MercadoriaRepository extends BaseRepository {
   }
 
   Future<void> addMercadoria(String estoqueId, Mercadoria mercadoria) async {
-    await _getMercadoriaRef(estoqueId).add(mercadoria);
-    await _atualizarContadorEstoque(mercadoria.estoqueId, incrementar: true);
+    final mercadoriaRef = _getMercadoriaRef(estoqueId).doc();
+    final batch = firestore.batch();
+    batch.set(mercadoriaRef, mercadoria);
+    batch.update(
+      firestore
+          .collection('users')
+          .doc(userId)
+          .collection('estoques')
+          .doc(estoqueId),
+      {'quantidadeItens': FieldValue.increment(mercadoria.quantidade)},
+    );
+
+    await batch.commit();
   }
 
-  Future<void> atualizarMercadoria(Mercadoria mercadoria) async {
-    await _getMercadoriaRef(mercadoria.estoqueId)
-        .doc(mercadoria.id)
-        .set(mercadoria);
+  Future<void> updateMercadoria(Mercadoria mercadoria) async {
+    await _getMercadoriaRef(
+      mercadoria.estoqueId,
+    ).doc(mercadoria.id).set(mercadoria);
   }
 
-  Future<void> atualizarQuantidadeMercadoria(String estoqueId, String mercadoriaId, int novaQtd) async {
-    await _getMercadoriaRef(estoqueId).doc(mercadoriaId).update({
-      'quantidade': novaQtd
+  Future<void> updateQuantidadeMercadoria(
+    String estoqueId,
+    String mercadoriaId,
+    int novaQtd,
+  ) async {
+    await _getMercadoriaRef(
+      estoqueId,
+    ).doc(mercadoriaId).update({'quantidade': novaQtd});
+  }
+
+  Future<void> removeMercadoria(String estoqueId, Mercadoria mercadoria) async {
+    final mercadoriaRef = _getMercadoriaRef(estoqueId).doc(mercadoria.id);
+    final estoqueRef = firestore
+        .collection('users')
+        .doc(userId)
+        .collection('estoques')
+        .doc(estoqueId);
+
+    final batch = firestore.batch();
+    batch.delete(mercadoriaRef);
+    batch.update(estoqueRef, {
+      'quantidadeItens': FieldValue.increment(-mercadoria.quantidade),
     });
-  }
 
-  Future<void> deletarMercadoria(String estoqueId, String mercadoriaId) async {
-    await _getMercadoriaRef(estoqueId).doc(mercadoriaId).delete();
-    await _atualizarContadorEstoque(estoqueId, incrementar: false);
-  }
-
-  Future<void> _atualizarContadorEstoque(String estoqueId, {required bool incrementar}) async {
-    final estoqueRef = firestore.collection('users').doc(userId).collection('estoques').doc(estoqueId);
-    
-    await estoqueRef.update({
-      'quantidadeItens': FieldValue.increment(incrementar ? 1 : -1)
-    });
+    await batch.commit();
   }
 }

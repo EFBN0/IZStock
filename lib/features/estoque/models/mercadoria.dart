@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class Mercadoria {
   final String id;
   final String estoqueId;
+  final String codigo;
   final String titulo;
   final String descricao;
   final double valorVenda;
@@ -13,6 +14,7 @@ class Mercadoria {
   const Mercadoria({
     required this.id,
     required this.estoqueId,
+    required this.codigo,
     required this.titulo,
     required this.descricao,
     required this.valorVenda,
@@ -26,6 +28,7 @@ class Mercadoria {
     return Mercadoria(
       id: doc.id,
       estoqueId: data['estoqueId'] ?? '',
+      codigo: data['codigo'] ?? '',
       titulo: data['titulo'] ?? '',
       descricao: data['descricao'] ?? '',
       valorVenda: (data['valorVenda'] ?? 0.0).toDouble(),
@@ -38,10 +41,11 @@ class Mercadoria {
   Map<String, dynamic> toFirestore() {
     return {
       'estoqueId': estoqueId,
+      'codigo': codigo,
       'titulo': titulo,
       'descricao': descricao,
       'valorVenda': valorVenda,
-      'precoCusto': valorCusto,
+      'valorCusto': valorCusto,
       'quantidade': quantidade,
       'imagemUrl': imagemUrl,
     };

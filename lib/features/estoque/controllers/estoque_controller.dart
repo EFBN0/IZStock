@@ -4,7 +4,7 @@ import 'package:izstock/features/estoque/models/estoque.dart';
 import 'package:izstock/features/estoque/repositories/estoque_repository.dart';
 
 final estoqueRepositoryProvider = Provider<EstoqueRepository>((ref) {
-  return EstoqueRepository(); 
+  return EstoqueRepository();
 });
 
 final estoqueListProvider = StreamProvider<List<Estoque>>((ref) {
@@ -12,9 +12,10 @@ final estoqueListProvider = StreamProvider<List<Estoque>>((ref) {
   return repository.getEstoquesStream();
 });
 
-final estoqueControllerProvider = AsyncNotifierProvider<EstoqueController, void>(() {
-  return EstoqueController();
-});
+final estoqueControllerProvider =
+    AsyncNotifierProvider<EstoqueController, void>(() {
+      return EstoqueController();
+    });
 
 class EstoqueController extends AsyncNotifier<void> {
   @override
@@ -30,12 +31,11 @@ class EstoqueController extends AsyncNotifier<void> {
     state = await AsyncValue.guard(() => repository.saveEstoque(titulo));
   }
 
-  Future<void> updateEstoque() async {
-    
-  }
+  Future<void> updateEstoque() async {}
 
   Future<void> removeEstoque(String id) async {
+    state = const AsyncLoading();
     final repository = ref.read(estoqueRepositoryProvider);
-    await repository.removeEstoque(id);
+    state = await AsyncValue.guard(() => repository.removeEstoque(id));
   }
 }

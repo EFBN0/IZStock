@@ -3,26 +3,27 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:izstock/features/estoque/controllers/mercadoria_controller.dart';
 import 'package:izstock/features/estoque/models/estoque.dart';
 import 'package:izstock/features/estoque/models/mercadoria.dart';
-import 'package:izstock/features/estoque/views/widgets/estoque_details_card.dart';
+import 'package:izstock/features/estoque/views/widgets/mercadoria_card.dart';
+import 'package:izstock/features/estoque/views/widgets/form_mercadoria.dart';
 
 class EstoqueDetailsPage extends ConsumerWidget {
   const EstoqueDetailsPage({super.key, required this.estoque});
 
   final Estoque estoque;
 
-  void _selectMercadoria(BuildContext context, Mercadoria mercadoria) {
+  void _touchMercadoria(BuildContext context, Mercadoria? mercadoria) {
     showModalBottomSheet(
       isScrollControlled: true,
       context: context,
-      builder: (ctx) => Padding(
-        padding: EdgeInsetsGeometry.fromLTRB(16, 48, 16, 16),
-        child: Column(
-          children: [
-            Row(children: [Text('mercadoria ')]),
-          ],
-        ),
-      ),
+      builder: (ctx) =>
+          FormMercadoria(mercadoria: mercadoria, estoque: estoque),
     );
+  }
+
+  void _removeMercadoria(WidgetRef ref, Mercadoria mercadoria) {
+    ref
+        .read(mercadoriaControllerProvider.notifier)
+        .removeMercadoria(estoque.id!, mercadoria);
   }
 
   @override
@@ -32,7 +33,9 @@ class EstoqueDetailsPage extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: Text('Estoque: ${estoque.titulo}')),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () {
+          _touchMercadoria(context, null);
+        },
         child: const Icon(Icons.add),
       ),
       body: mercadoriaAsyncList.when(
@@ -61,9 +64,14 @@ class EstoqueDetailsPage extends ConsumerWidget {
                 margin: EdgeInsets.symmetric(vertical: 10),
                 child: GestureDetector(
                   onTap: () {
-                    _selectMercadoria(context, mercadorias[index]);
+                    _touchMercadoria(context, mercadorias[index]);
                   },
-                  child: EstoqueDetailsCard(mercadoria: mercadorias[index]),
+                  child: MercadoriaCard(
+                    mercadoria: mercadorias[index],
+                    onRemoveMercadoria: (mercadoria) {
+                      _removeMercadoria(ref, mercadoria);
+                    },
+                  ),
                 ),
               ),
             ),

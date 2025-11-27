@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:uuid/uuid.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:izstock/features/estoque/models/mercadoria.dart';
 import 'package:izstock/features/estoque/repositories/mercadoria_repository.dart';
@@ -17,6 +18,8 @@ final mercadoriaControllerProvider = AsyncNotifierProvider<MercadoriaController,
 });
 
 class MercadoriaController extends AsyncNotifier<void> {
+  final _uuid = const Uuid();
+
   @override
   FutureOr<void> build() {
     return null;
@@ -35,6 +38,7 @@ class MercadoriaController extends AsyncNotifier<void> {
     final novaMercadoria = Mercadoria(
       id: '',
       estoqueId: estoqueId,
+      codigo:  _uuid.v4(),
       titulo: titulo,
       descricao: '',
       valorVenda: valorVenda,
@@ -45,8 +49,9 @@ class MercadoriaController extends AsyncNotifier<void> {
     state = await AsyncValue.guard(() => repository.addMercadoria(estoqueId, novaMercadoria));
   }
 
-  Future<void> excluirMercadoria(String estoqueId, String mercadoriaId) async {
+  Future<void> removeMercadoria(String estoqueId, Mercadoria mercadoria) async {
+    state = const AsyncLoading();
     final repository = ref.read(mercadoriaRepositoryProvider);
-    await repository.deletarMercadoria(estoqueId, mercadoriaId);
+    state = await AsyncValue.guard(() => repository.removeMercadoria(estoqueId, mercadoria));
   }
 }

@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:izstock/features/estoque/models/mercadoria.dart';
 
-class EstoqueDetailsCard extends StatelessWidget {
-  const EstoqueDetailsCard({
+class MercadoriaCard extends StatelessWidget {
+  const MercadoriaCard({
     super.key,
     required this.mercadoria,
+    required this.onRemoveMercadoria
   });
 
   final Mercadoria mercadoria;
+  final void Function(Mercadoria mercadoria) onRemoveMercadoria;
 
   @override
   Widget build(BuildContext context) {
@@ -29,11 +31,15 @@ class EstoqueDetailsCard extends StatelessWidget {
                   style: Theme.of(context).textTheme.titleMedium!,
                 ),
                 const SizedBox(height: 6),
-                Text('Valor: R\$ ${mercadoria.valorVenda}'),
+                Text('Valor: R\$ ${mercadoria.valorVenda.toStringAsFixed(2).replaceAll('.', ',')}'),
+                const SizedBox(height: 6),
+                Text('Qtd.: ${mercadoria.quantidade}'),
               ],
             ),
             IconButton.outlined(
-              onPressed: () {},
+              onPressed: () {
+                onRemoveMercadoria(mercadoria);
+              },
               icon: const Icon(
                 Icons.delete,
                 size: 20,
