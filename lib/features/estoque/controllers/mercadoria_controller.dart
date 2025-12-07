@@ -38,6 +38,7 @@ class MercadoriaController extends AsyncNotifier<void> {
     final novaMercadoria = Mercadoria(
       id: '',
       estoqueId: estoqueId,
+      userId: '',
       codigo:  _uuid.v4(),
       titulo: titulo,
       descricao: '',

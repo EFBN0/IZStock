@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class Mercadoria {
   final String id;
   final String estoqueId;
+  final String userId;
   final String codigo;
   final String titulo;
   final String descricao;
@@ -14,6 +15,7 @@ class Mercadoria {
   const Mercadoria({
     required this.id,
     required this.estoqueId,
+    required this.userId,
     required this.codigo,
     required this.titulo,
     required this.descricao,
@@ -28,6 +30,7 @@ class Mercadoria {
     return Mercadoria(
       id: doc.id,
       estoqueId: data['estoqueId'] ?? '',
+      userId: data['userId'] ?? '',
       codigo: data['codigo'] ?? '',
       titulo: data['titulo'] ?? '',
       descricao: data['descricao'] ?? '',
@@ -41,6 +44,7 @@ class Mercadoria {
   Map<String, dynamic> toFirestore() {
     return {
       'estoqueId': estoqueId,
+      'userId': userId,
       'codigo': codigo,
       'titulo': titulo,
       'descricao': descricao,
@@ -49,5 +53,31 @@ class Mercadoria {
       'quantidade': quantidade,
       'imagemUrl': imagemUrl,
     };
+  }
+
+  Mercadoria copyWith({
+    String? id,
+    String? estoqueId,
+    String? userId,
+    String? codigo,
+    String? titulo,
+    String? descricao,
+    double? valorVenda,
+    double? valorCusto,
+    int? quantidade,
+    String? imagemUrl,
+  }) {
+    return Mercadoria(
+      id: id ?? this.id,
+      estoqueId: estoqueId ?? this.estoqueId,
+      userId: userId ?? this.userId,
+      codigo: codigo ?? this.codigo,
+      titulo: titulo ?? this.titulo,
+      descricao: descricao ?? this.descricao,
+      valorVenda: valorVenda ?? this.valorVenda,
+      valorCusto: valorCusto ?? this.valorCusto,
+      quantidade: quantidade ?? this.quantidade,
+      imagemUrl: imagemUrl ?? this.imagemUrl
+    );
   }
 }

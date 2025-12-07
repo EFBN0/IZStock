@@ -1,9 +1,8 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:izstock/features/dashboard/dashboard.dart';
 import 'package:izstock/features/configuracoes/configuracoes.dart';
 import 'package:izstock/features/estoque/views/pages/estoques_page.dart';
-import 'package:izstock/features/vendas/vendas.dart';
+import 'package:izstock/features/vendas/views/pages/carrinho_page.dart';
 
 class ScreenNavigationItem {
   const ScreenNavigationItem({
@@ -39,7 +38,13 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       icon: Icon(Icons.warehouse),
     ),
     const ScreenNavigationItem(
-      screen: TransactionScreen(),
+      screen: CarrinhoPage(),
+      title: 'Histórico de vendas',
+      label: 'Histórico',
+      icon: Icon(Icons.receipt),
+    ),
+    const ScreenNavigationItem(
+      screen: CarrinhoPage(),
       title: 'Carrinho',
       label: 'Vender',
       icon: Icon(Icons.shopping_cart_outlined),
@@ -61,23 +66,6 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        elevation: 5.0,
-        shadowColor: const Color.fromARGB(255, 0, 0, 0).withValues(alpha: 0.5),
-        centerTitle: true,
-        title: Text(_screens[_selectedScreenIndex].title),
-        actions: [
-          IconButton(
-            onPressed: () {
-              FirebaseAuth.instance.signOut();
-            },
-            icon: Icon(
-              Icons.exit_to_app,
-              color: Theme.of(context).colorScheme.primary,
-            ),
-          ),
-        ],
-      ),
       body: _screens[_selectedScreenIndex].screen,
       bottomNavigationBar: BottomNavigationBar(
         onTap: (index) {

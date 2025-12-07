@@ -26,26 +26,23 @@ class MercadoriaRepository extends BaseRepository {
     });
   }
 
-  Future<List<Mercadoria>> findMercadoriasByText(String text) async {
-    if (text.isEmpty) return [];
-
-    final query = firestore
+  Stream<List<Mercadoria>> findAllMercadorias() {
+    return firestore
         .collectionGroup('mercadorias')
-        .where('titulo', isGreaterThanOrEqualTo: text)
-        .where('titulo', isLessThan: '$text\uf8ff')
+        .where('userId', isEqualTo: userId)
+        .orderBy('titulo')
         .withConverter<Mercadoria>(
           fromFirestore: (snapshot, _) => Mercadoria.fromFirestore(snapshot),
           toFirestore: (mercadoria, _) => mercadoria.toFirestore(),
-        );
-
-    final snapshot = await query.get();
-    return snapshot.docs.map((doc) => doc.data()).toList();
+        )
+        .snapshots()
+        .map((s) => s.docs.map((d) => d.data()).toList());
   }
 
   Future<void> addMercadoria(String estoqueId, Mercadoria mercadoria) async {
     final mercadoriaRef = _getMercadoriaRef(estoqueId).doc();
     final batch = firestore.batch();
-    batch.set(mercadoriaRef, mercadoria);
+    batch.set(mercadoriaRef, mercadoria.copyWith(userId: userId));
     batch.update(
       firestore
           .collection('users')

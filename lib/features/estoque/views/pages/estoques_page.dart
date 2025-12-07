@@ -76,6 +76,23 @@ class EstoquesPage extends ConsumerWidget {
     final estoqueAsyncList = ref.watch(estoqueListProvider);
 
     return Scaffold(
+      appBar: AppBar(
+        elevation: 5.0,
+        shadowColor: const Color.fromARGB(255, 0, 0, 0).withValues(alpha: 0.5),
+        centerTitle: true,
+        title: Text('Estoques'),
+        actions: [
+          IconButton(
+            onPressed: () {
+              // FirebaseAuth.instance.signOut();
+            },
+            icon: Icon(
+              Icons.exit_to_app,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           _addEstoque(context);
