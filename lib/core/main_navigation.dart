@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:izstock/features/dashboard/dashboard.dart';
 import 'package:izstock/features/configuracoes/configuracoes.dart';
 import 'package:izstock/features/estoque/views/pages/estoques_page.dart';
+import 'package:izstock/features/historico-vendas/pages/historico_vendas_page.dart';
 import 'package:izstock/features/vendas/views/pages/carrinho_page.dart';
 
 class ScreenNavigationItem {
@@ -38,7 +39,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       icon: Icon(Icons.warehouse),
     ),
     const ScreenNavigationItem(
-      screen: CarrinhoPage(),
+      screen: HistoricoVendasPage(),
       title: 'Histórico de vendas',
       label: 'Histórico',
       icon: Icon(Icons.receipt),

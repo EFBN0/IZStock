@@ -93,7 +93,7 @@ class MercadoriaList extends ConsumerWidget {
       ),
       onTap: () {
         ref
-            .watch(carrinhoProvider.notifier)
+            .watch(carrinhoControllerProvider.notifier)
             .addMercadoriaToCarrinho(mercadoria);
         Navigator.of(context).pop();
       },

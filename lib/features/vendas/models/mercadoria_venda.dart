@@ -2,27 +2,23 @@ import 'package:izstock/features/estoque/models/mercadoria.dart';
 
 class MercadoriaVenda {
   MercadoriaVenda({
-    this.id,
-    this.vendaId,
     required this.estoqueId,
     required this.mercadoriaId,
     required this.titulo,
-    required this.valor,
+    required this.valorVenda,
+    required this.valorCusto,
     required this.quantidade,
-    this.imagemUrl,
   });
 
-  final String? id;
-  final String? vendaId;
   final String estoqueId;
   final String mercadoriaId;
   final String titulo;
-  final double valor;
+  final double valorVenda;
+  final double valorCusto;
   final int quantidade;
-  final String? imagemUrl;
 
   double get valorTotal {
-    return valor * quantidade;
+    return valorVenda * quantidade;
   }
 
   factory MercadoriaVenda.fromMercadoria(Mercadoria mercadoria) {
@@ -30,30 +26,49 @@ class MercadoriaVenda {
       estoqueId: mercadoria.estoqueId,
       mercadoriaId: mercadoria.id,
       titulo: mercadoria.titulo,
-      valor: mercadoria.valorVenda,
+      valorVenda: mercadoria.valorVenda,
+      valorCusto: mercadoria.valorCusto,
       quantidade: 1,
     );
   }
 
   MercadoriaVenda copyWith({
-    String? id,
-    String? vendaId,
     String? estoqueId,
     String? mercadoriaId,
     String? titulo,
-    double? valor,
+    double? valorVenda,
+    double? valorCusto,
     int? quantidade,
-    String? imagemUrl,
   }) {
     return MercadoriaVenda(
-      id: id ?? this.id,
-      vendaId: vendaId ?? this.vendaId,
       estoqueId: estoqueId ?? this.estoqueId,
       mercadoriaId: mercadoriaId ?? this.mercadoriaId,
       titulo: titulo ?? this.titulo,
-      valor: valor ?? this.valor,
+      valorVenda: valorVenda ?? this.valorVenda,
+      valorCusto: valorCusto ?? this.valorCusto,
       quantidade: quantidade ?? this.quantidade,
-      imagemUrl: imagemUrl ?? this.imagemUrl,
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'mercadoriaId': mercadoriaId,
+      'estoqueId': estoqueId,
+      'titulo': titulo,
+      'valorVenda': valorVenda,
+      'valorCusto': valorCusto,
+      'quantidade': quantidade,
+    };
+  }
+
+  factory MercadoriaVenda.fromMap(Map<String, dynamic> map) {
+    return MercadoriaVenda(
+      mercadoriaId: map['mercadoriaId'] ?? '',
+      estoqueId: map['estoqueId'] ?? '',
+      titulo: map['titulo'] ?? '',
+      valorVenda: (map['valorVenda'] ?? 0.0).toDouble(),
+      valorCusto: (map['valorCusto'] ?? 0.0).toDouble(),
+      quantidade: map['quantidade'] ?? 1,
     );
   }
 }

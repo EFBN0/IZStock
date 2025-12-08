@@ -46,7 +46,7 @@ class CardMercadoriaCarrinho extends ConsumerWidget {
                 Row(
                   children: [
                     Text(
-                      formatCurrency(mercadoria.valor),
+                      formatCurrency(mercadoria.valorVenda),
                       style: TextStyle(color: Colors.grey[600], fontSize: 12),
                     ),
                     const SizedBox(width: 8),
@@ -69,7 +69,7 @@ class CardMercadoriaCarrinho extends ConsumerWidget {
                   icon: Icons.remove,
                   onTap: () {
                     ref
-                        .watch(carrinhoProvider.notifier)
+                        .watch(carrinhoControllerProvider.notifier)
                         .decrementMercadoria(mercadoria);
                   },
                   ativo: mercadoria.quantidade > 1,
@@ -92,7 +92,7 @@ class CardMercadoriaCarrinho extends ConsumerWidget {
                   icon: Icons.add,
                   onTap: () {
                     ref
-                        .watch(carrinhoProvider.notifier)
+                        .watch(carrinhoControllerProvider.notifier)
                         .incrementMercadoria(mercadoria);
                   },
                   ativo: true,
@@ -107,7 +107,7 @@ class CardMercadoriaCarrinho extends ConsumerWidget {
                   ),
                   onPressed: () {
                     ref
-                        .watch(carrinhoProvider.notifier)
+                        .watch(carrinhoControllerProvider.notifier)
                         .removeMercadoria(mercadoria);
                   },
                   padding: EdgeInsets.zero,

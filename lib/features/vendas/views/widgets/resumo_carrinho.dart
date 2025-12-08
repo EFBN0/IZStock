@@ -43,7 +43,7 @@ class ResumoCarrinho extends ConsumerWidget {
               ),
               Text(
                 formatCurrency(
-                  ref.watch(carrinhoProvider.notifier).getValorTotal(),
+                  ref.watch(carrinhoControllerProvider.notifier).valorTotal,
                 ),
                 style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
               ),

@@ -12,18 +12,23 @@ final mercadoriasProvider = StreamProvider<List<Mercadoria>>((ref) {
   return repository.findAllMercadorias();
 });
 
-final mercadoriasFiltradasProvider = Provider<AsyncValue<List<Mercadoria>>>((ref) {
+final mercadoriasFiltradasProvider = Provider<AsyncValue<List<Mercadoria>>>((
+  ref,
+) {
   final termo = ref.watch(termoBuscaProvider).toLowerCase();
-  final todas = ref.watch(mercadoriasProvider);
+  final allMercadorias = ref.watch(mercadoriasProvider);
 
-  return todas.whenData((mercadorias) {
+  return allMercadorias.whenData((mercadorias) {
     if (termo.isEmpty) {
-      return mercadorias;
+      return mercadorias.where((m) => m.quantidade > 0).toList();
     }
 
-    return mercadorias.where((mercadoria) {
-      final titulo = mercadoria.titulo.toLowerCase();
-      return titulo.contains(termo); 
-    }).toList();
+    return mercadorias
+        .where((mercadoria) {
+          final titulo = mercadoria.titulo.toLowerCase();
+          return titulo.contains(termo);
+        })
+        .where((m) => m.quantidade > 0)
+        .toList();
   });
 });

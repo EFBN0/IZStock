@@ -1,88 +1,135 @@
-import 'package:flutter_riverpod/legacy.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:izstock/features/estoque/models/mercadoria.dart';
 import 'package:izstock/features/vendas/models/mercadoria_venda.dart';
+import 'package:izstock/features/vendas/models/venda.dart';
+import 'package:izstock/features/vendas/repositories/venda_repository.dart';
+import 'package:uuid/uuid.dart';
 
-class MercadoriasNotifier extends StateNotifier<List<MercadoriaVenda>> {
-  MercadoriasNotifier() : super([]);
+final vendaRepositoryProvider = Provider((ref) => VendaRepository());
+
+final carrinhoControllerProvider = 
+    AsyncNotifierProvider<CarrinhoController, List<MercadoriaVenda>>(() {
+  return CarrinhoController();
+});
+
+class CarrinhoController extends AsyncNotifier<List<MercadoriaVenda>> {
+
+  @override
+  List<MercadoriaVenda> build() => [];
 
   void addMercadoriaToCarrinho(Mercadoria mercadoria) {
-    final mercadoriaAlreadyAdded = state
+    final currentList = state.value ?? [];
+
+    final mercadoriaAlreadyAdded = currentList
         .where((m) => m.mercadoriaId == mercadoria.id)
         .isNotEmpty;
 
     if (mercadoriaAlreadyAdded) {
-      final index = state.indexWhere((m) => m.mercadoriaId == mercadoria.id);
-      state[index] = state[index].copyWith(
-        quantidade: state[index].quantidade + 1,
+      final index = currentList.indexWhere((m) => m.mercadoriaId == mercadoria.id);
+      
+      final newList = List<MercadoriaVenda>.from(currentList);
+      
+      newList[index] = newList[index].copyWith(
+        quantidade: newList[index].quantidade + 1,
       );
+      
+      state = AsyncData(newList);
+      
     } else {
-      var newMercadoriaVenda = MercadoriaVenda.fromMercadoria(mercadoria);
-      state = [...state, newMercadoriaVenda];
+      final newMercadoriaVenda = MercadoriaVenda.fromMercadoria(mercadoria);
+
+      state = AsyncData([...currentList, newMercadoriaVenda]);
     }
   }
 
-  void incrementMercadoria(MercadoriaVenda mercadoria) {
-    final index = state.indexWhere(
-      (m) => m.mercadoriaId == mercadoria.mercadoriaId,
-    );
-    if (index < 0) {
-      return;
-    }
-
-    final novaMercadoria = mercadoria.copyWith(
-      quantidade: state[index].quantidade + 1,
-    );
-
-    state = [
-      for (final m in state)
-        if (m.mercadoriaId == mercadoria.mercadoriaId) novaMercadoria else m,
+  void incrementMercadoria(MercadoriaVenda item) {
+    final currentList = state.value ?? [];
+    final newList = [
+      for (final m in currentList)
+        if (m.mercadoriaId == item.mercadoriaId) 
+          m.copyWith(quantidade: m.quantidade + 1)
+        else 
+          m
     ];
+
+    state = AsyncData(newList);
   }
 
-  void decrementMercadoria(MercadoriaVenda mercadoria) {
-    final index = state.indexWhere(
-      (m) => m.mercadoriaId == mercadoria.mercadoriaId,
-    );
-    if (index < 0) {
+  void decrementMercadoria(MercadoriaVenda item) {
+    final currentList = state.value ?? [];
+    final index = currentList.indexWhere((m) => m.mercadoriaId == item.mercadoriaId);
+    
+    if (index < 0) return;
+
+    if (currentList[index].quantidade == 1) {
+      removeMercadoria(item);
       return;
     }
 
-    if (state[index].quantidade == 1) {
-      removeMercadoria(mercadoria);
-      return;
-    }
-
-    final novaMercadoria = mercadoria.copyWith(
-      quantidade: state[index].quantidade - 1,
-    );
-
-    state = [
-      for (final m in state)
-        if (m.mercadoriaId == mercadoria.mercadoriaId) novaMercadoria else m,
+    final newList = [
+      for (final m in currentList)
+        if (m.mercadoriaId == item.mercadoriaId) 
+          m.copyWith(quantidade: m.quantidade - 1)
+        else 
+          m
     ];
+
+    state = AsyncData(newList);
   }
 
-  void removeMercadoria(MercadoriaVenda mercadoria) {
-    state = state
-          .where((m) => m.mercadoriaId != mercadoria.mercadoriaId)
-          .toList();
+  void removeMercadoria(MercadoriaVenda item) {
+    final currentList = state.value ?? [];
+    
+    final newList = currentList
+        .where((m) => m.mercadoriaId != item.mercadoriaId)
+        .toList();
+        
+    state = AsyncData(newList);
+  }
+  
+  double get valorTotal {
+    final list = state.value ?? [];
+    if (list.isEmpty) return 0.0;
+    
+    return list.fold(0.0, (total, item) => total + (item.valorVenda * item.quantidade));
   }
 
-  double getValorTotal() {
-    if (state.isEmpty) {
-      return 0.0;
+  Future<void> finalizarVenda({
+    double? latitude,
+    double? longitude,
+  }) async {
+    final currentList = state.value ?? [];
+    if (currentList.isEmpty) return;
+
+    final vendaRepository = ref.read(vendaRepositoryProvider);
+
+    double valorTotal = 0;
+    double custoTotal = 0;
+
+    for (var item in currentList) {
+      valorTotal += item.valorVenda * item.quantidade;
+      custoTotal += item.valorCusto * item.quantidade;
     }
 
-    double valorTotal = 0.0;
-    for (final mercadoria in state) {
-      valorTotal += mercadoria.valor * mercadoria.quantidade;
-    }
+    final lucroTotal = valorTotal - custoTotal;
 
-    return valorTotal;
+    final novaVenda = Venda(
+      id: const Uuid().v4(),
+      userId: '',
+      data: DateTime.now(),
+      valorVendaTotal: valorTotal,
+      valorCustoTotal: custoTotal,
+      lucroTotal: lucroTotal,
+      itens: currentList,
+      latitude: latitude,
+      longitude: longitude,
+    );
+
+    state = const AsyncLoading();
+
+    state = await AsyncValue.guard(() async {
+      await vendaRepository.registrarVenda(novaVenda);
+      return [];
+    });
   }
 }
-
-final carrinhoProvider =
-    StateNotifierProvider<MercadoriasNotifier, List<MercadoriaVenda>>((ref) {
-      return MercadoriasNotifier();
-    });
