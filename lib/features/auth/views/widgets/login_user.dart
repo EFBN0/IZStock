@@ -37,9 +37,10 @@ class _LoginState extends State<Login> {
         password: _enteredPassword,
       );
     } on FirebaseAuthException catch (error) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).clearSnackBars();
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error.message ?? 'Falha ao autentiar usuário')),
+        SnackBar(content: Text(error.message ?? 'Falha ao autenticar usuário')),
       );
     }
   }
