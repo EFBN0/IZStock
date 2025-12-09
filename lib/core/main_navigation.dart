@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:izstock/features/dashboard/dashboard.dart';
 import 'package:izstock/features/configuracoes/configuracoes.dart';
+import 'package:izstock/features/dashboard/pages/dashboard_page.dart';
 import 'package:izstock/features/estoque/views/pages/estoques_page.dart';
 import 'package:izstock/features/historico-vendas/pages/historico_vendas_page.dart';
 import 'package:izstock/features/vendas/views/pages/carrinho_page.dart';
@@ -51,9 +51,9 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       icon: Icon(Icons.shopping_cart_outlined),
     ),
     const ScreenNavigationItem(
-      screen: DashboardScreen(),
+      screen: DashboardPage(),
       title: 'Dashboard',
-      label: 'Análises',
+      label: 'Dashboard',
       icon: Icon(Icons.insert_chart_outlined_rounded),
     ),
     const ScreenNavigationItem(

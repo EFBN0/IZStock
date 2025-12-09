@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:izstock/features/commons/services/formatter_service.dart';
 import 'package:izstock/features/estoque/models/mercadoria.dart';
 import 'package:izstock/features/vendas/controllers/carrinho_controller.dart';
 import 'package:izstock/features/vendas/controllers/mercadoria_list_controller.dart';
@@ -78,7 +79,7 @@ class MercadoriaList extends ConsumerWidget {
   Widget _buildItemMercadoria(Mercadoria mercadoria, BuildContext context, WidgetRef ref) {
     return ListTile(
       title: Text(mercadoria.titulo),
-      subtitle: Text('R\$ ${mercadoria.valorVenda.toStringAsFixed(2)}'),
+      subtitle: Text(FormatterService.formatAsCurrency(mercadoria.valorVenda)),
       leading: Container(
         width: 40,
         height: 40,

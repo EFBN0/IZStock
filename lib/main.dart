@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:izstock/features/auth/views/auth_page.dart';
 import 'package:izstock/core/main_navigation.dart';
 import 'package:izstock/core/styles/theme.dart';
@@ -10,6 +11,7 @@ import 'firebase_options.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await initializeDateFormatting('pt_BR', null);
   runApp(ProviderScope(child: const App()));
 }
 

@@ -1,24 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
+import 'package:izstock/features/commons/services/formatter_service.dart';
 import 'package:izstock/features/vendas/controllers/carrinho_controller.dart';
 
 class ResumoCarrinho extends ConsumerWidget {
   const ResumoCarrinho({super.key});
 
-  String formatCurrency(double valor) {
-    final currencyFormatter = NumberFormat.currency(
-      locale: 'pt_BR',
-      symbol: 'R\$',
-      decimalDigits: 2,
-    );
-    return currencyFormatter.format(valor);
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // final mercadoriasAsync = ref.watch(carrinhoProvider);
-
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -42,7 +31,7 @@ class ResumoCarrinho extends ConsumerWidget {
                 style: TextStyle(color: Colors.grey, fontSize: 16),
               ),
               Text(
-                formatCurrency(
+                FormatterService.formatAsCurrency(
                   ref.watch(carrinhoControllerProvider.notifier).valorTotal,
                 ),
                 style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),

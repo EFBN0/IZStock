@@ -39,17 +39,16 @@ class VendaRepository extends BaseRepository {
       });
     }
 
-    final String idDiario =
-        "${venda.data.year}-${venda.data.month.toString().padLeft(2, '0')}-${venda.data.day.toString().padLeft(2, '0')}";
+    final String dateId = "${venda.data.year}-${venda.data.month.toString().padLeft(2, '0')}-${venda.data.day.toString().padLeft(2, '0')}";
 
     final resumoRef = firestore
         .collection('users')
         .doc(userId)
         .collection('resumos')
-        .doc(idDiario);
+        .doc(dateId);
 
     batch.set(resumoRef, {
-      'data': idDiario,
+      'data': dateId,
       'faturamento': FieldValue.increment(venda.valorVendaTotal),
       'lucro': FieldValue.increment(venda.lucroTotal),
       'qtdVendas': FieldValue.increment(1),

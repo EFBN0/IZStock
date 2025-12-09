@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:izstock/features/estoque/controllers/estoque_controller.dart';
@@ -84,7 +85,7 @@ class EstoquesPage extends ConsumerWidget {
         actions: [
           IconButton(
             onPressed: () {
-              // FirebaseAuth.instance.signOut();
+              FirebaseAuth.instance.signOut();
             },
             icon: Icon(
               Icons.exit_to_app,
