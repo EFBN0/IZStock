@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:izstock/features/commons/services/location_service.dart';
 import 'package:izstock/features/estoque/models/mercadoria.dart';
@@ -127,20 +128,18 @@ class CarrinhoController extends AsyncNotifier<CarrinhoState> {
     );
   }
 
-  Future<void> finalizarVenda({
-    required MeioPagamento meioPagamento
-  }) async {
+  Future<void> finalizarVenda({required MeioPagamento meioPagamento}) async {
     state = const AsyncLoading();
 
     double? lat;
     double? long;
-    
+
     try {
       final position = await LocationService.getLocalizacaoAtual();
       lat = position.latitude;
       long = position.longitude;
     } catch (e) {
-      print('Erro ao obter localização: $e');
+      debugPrint('Erro ao obter localização: $e');
     }
 
     final currentList = state.value!.mercadoriaList;
