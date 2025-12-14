@@ -34,6 +34,12 @@ class TabFinanceiro extends ConsumerWidget {
                   _buildKpiCard('Lucro Líquido', resumo.lucro, Colors.green),
                   const SizedBox(height: 8),
                   _buildKpiCard(
+                    'Capital de giro',
+                    resumo.capitalGiro,
+                    const Color.fromARGB(255, 39, 144, 176),
+                  ),
+                  const SizedBox(height: 8),
+                  _buildKpiCard(
                     'Ticket Médio',
                     resumo.ticketMedio,
                     Colors.purple,

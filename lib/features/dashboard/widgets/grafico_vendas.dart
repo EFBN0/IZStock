@@ -13,7 +13,6 @@ class GraficoVendasSemanal extends StatelessWidget {
     final List<Map<String, dynamic>> dadosProcessados = [];
     double maxValor = 0;
 
-    // TODO: ajeitar Loop reverso: de 6 dias atrás até hoje
     for (int i = 6; i >= 0; i--) {
       final diaAlvo = currentDate.subtract(Duration(days: i));
       final idDia = DateFormat('yyyy-MM-dd').format(diaAlvo);
@@ -30,7 +29,7 @@ class GraficoVendasSemanal extends StatelessWidget {
       dadosProcessados.add({
         'dia': labelDia,
         'valor': valor,
-        'id': i,
+        'id': 6 - i,
       });
     }
 

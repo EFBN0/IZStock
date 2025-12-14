@@ -1,11 +1,13 @@
 class ResumoFinanceiro {
   final double faturamento;
   final double lucro;
+  final double capitalGiro;
   final int qtdVendas;
 
   const ResumoFinanceiro({
     required this.faturamento,
     required this.lucro,
+    required this.capitalGiro,
     required this.qtdVendas,
   });
 
@@ -13,6 +15,7 @@ class ResumoFinanceiro {
     return ResumoFinanceiro(
       faturamento: (map['faturamento'] as num?)?.toDouble() ?? 0.0,
       lucro: (map['lucro'] as num?)?.toDouble() ?? 0.0,
+      capitalGiro: (map['capitalGiro'] as num?)?.toDouble() ?? 0.0,
       qtdVendas: (map['qtdVendas'] as num?)?.toInt() ?? 0,
     );
   }

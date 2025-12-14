@@ -73,6 +73,7 @@ class VendaRepository extends BaseRepository {
       'data': dateId,
       'faturamento': FieldValue.increment(venda.valorVendaTotal),
       'lucro': FieldValue.increment(venda.lucroTotal),
+      'capitalGiro': FieldValue.increment(venda.valorVendaTotal - venda.lucroTotal),
       'qtdVendas': FieldValue.increment(1),
     }, SetOptions(merge: true));
 
