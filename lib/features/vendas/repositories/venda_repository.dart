@@ -5,13 +5,34 @@ import 'package:izstock/features/vendas/models/venda.dart';
 class VendaRepository extends BaseRepository {
   VendaRepository({super.firestore, super.auth});
 
-  Future<void> registrarVenda(Venda venda) async {
-    final batch = firestore.batch();
-    final vendaRef = firestore
+  CollectionReference<Venda> get _vendasRef {
+    return firestore
         .collection('users')
         .doc(userId)
         .collection('vendas')
-        .doc(venda.id);
+        .withConverter<Venda>(
+          fromFirestore: (snapshot, _) => Venda.fromFirestore(snapshot),
+          toFirestore: (venda, _) => venda.toFirestore(),
+        );
+  }
+
+  Stream<List<Venda>> getVendasStreamByDateRange(Timestamp startDate, Timestamp endDate) {
+    return _vendasRef
+        .where('data', isGreaterThanOrEqualTo: startDate)
+        .where('data', isLessThanOrEqualTo: endDate)
+        .snapshots()
+        .map((snapshot) {
+          return snapshot.docs.map((doc) => doc.data()).toList();
+        });
+  }
+
+  Future<void> registrarVenda(Venda venda) async {
+    final batch = firestore.batch();
+    final vendaRef = firestore
+      .collection('users')
+      .doc(userId)
+      .collection('vendas')
+      .doc(venda.id);
 
     batch.set(vendaRef, venda.copyWith(userId: userId).toFirestore());
 
@@ -39,7 +60,8 @@ class VendaRepository extends BaseRepository {
       });
     }
 
-    final String dateId = "${venda.data.year}-${venda.data.month.toString().padLeft(2, '0')}-${venda.data.day.toString().padLeft(2, '0')}";
+    final String dateId =
+        "${venda.data.year}-${venda.data.month.toString().padLeft(2, '0')}-${venda.data.day.toString().padLeft(2, '0')}";
 
     final resumoRef = firestore
         .collection('users')

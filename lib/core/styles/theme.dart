@@ -2,14 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 final ColorScheme kColorSchemeEscuro = ColorScheme.fromSeed(
-  seedColor: const Color.fromARGB(255, 136, 88, 224),
+  seedColor: const Color.fromARGB(255, 88, 129, 224),
 
 //  brightness: Brightness.dark,
 );
 
 final TextTheme kTextThemeEscuro = GoogleFonts.lexendTextTheme(
-  // Pegamos o tema de texto escuro padrão do Flutter (que tem cores claras)
-  // e aplicamos a fonte "Lexend" a ele.
   // ThemeData(brightness: Brightness.dark).textTheme,
 );
 

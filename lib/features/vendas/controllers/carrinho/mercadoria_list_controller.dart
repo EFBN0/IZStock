@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:izstock/features/estoque/controllers/estoque_controller.dart';
 import 'package:izstock/features/estoque/models/mercadoria.dart';
-import 'package:izstock/features/vendas/controllers/search_mercadoria_controller.dart';
+import 'package:izstock/features/vendas/controllers/carrinho/search_mercadoria_controller.dart';
 
 final mercadoriasAgrupadasProvider =
     Provider<AsyncValue<Map<String, List<Mercadoria>>>>((ref) {

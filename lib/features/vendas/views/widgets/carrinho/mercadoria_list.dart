@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:izstock/features/commons/services/formatter_service.dart';
 import 'package:izstock/features/estoque/models/mercadoria.dart';
-import 'package:izstock/features/vendas/controllers/carrinho_controller.dart';
-import 'package:izstock/features/vendas/controllers/mercadoria_list_controller.dart';
+import 'package:izstock/features/vendas/controllers/carrinho/carrinho_controller.dart';
+import 'package:izstock/features/vendas/controllers/carrinho/mercadoria_list_controller.dart';
 
 class MercadoriaList extends ConsumerWidget {
   const MercadoriaList({super.key});

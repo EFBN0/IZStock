@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:izstock/features/vendas/models/meio_pagamento_enum.dart';
 import 'package:izstock/features/vendas/models/mercadoria_venda.dart';
 
 class Venda {
@@ -8,6 +9,7 @@ class Venda {
   final double valorVendaTotal;
   final double valorCustoTotal;
   final double lucroTotal;
+  final MeioPagamento meioPagamento;
   final List<MercadoriaVenda> itens;
   final double? latitude;
   final double? longitude;
@@ -19,6 +21,7 @@ class Venda {
     required this.valorVendaTotal,
     required this.valorCustoTotal,
     required this.lucroTotal,
+    required this.meioPagamento,
     required this.itens,
     this.latitude,
     this.longitude,
@@ -31,6 +34,7 @@ class Venda {
       'valorVendaTotal': valorVendaTotal,
       'valorCustoTotal': valorCustoTotal,
       'lucroTotal': lucroTotal,
+      'meioPagamento': meioPagamento.name,
       'itens': itens.map((item) => item.toMap()).toList(),
       'latitude': latitude,
       'longitude': longitude,
@@ -46,6 +50,7 @@ class Venda {
       valorVendaTotal: (data['valorVendaTotal'] ?? 0.0).toDouble(),
       valorCustoTotal: (data['valorCustoTotal'] ?? 0.0).toDouble(),
       lucroTotal: (data['lucroTotal'] ?? 0.0).toDouble(),
+      meioPagamento: MeioPagamento.fromString(data['meioPagamento']),
       itens: (data['itens'] as List<dynamic>?)
               ?.map((item) => MercadoriaVenda.fromMap(item as Map<String, dynamic>))
               .toList() ??
@@ -62,6 +67,7 @@ class Venda {
     double? valorVendaTotal,
     double? valorCustoTotal,
     double? lucroTotal,
+    MeioPagamento? meioPagamento,
     List<MercadoriaVenda>? itens,
     double? latitude,
     double? longitude,
@@ -72,6 +78,7 @@ class Venda {
       valorVendaTotal: valorVendaTotal ?? this.valorVendaTotal,
       valorCustoTotal: valorCustoTotal ?? this.valorCustoTotal,
       lucroTotal: lucroTotal ?? this.lucroTotal,
+      meioPagamento: meioPagamento ?? this.meioPagamento,
       itens: itens ?? this.itens,
       latitude: latitude ?? this.latitude,
       longitude: longitude ?? this.longitude,

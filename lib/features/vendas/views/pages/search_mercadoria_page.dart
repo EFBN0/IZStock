@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:izstock/features/commons/widgets/search_input.dart';
-import 'package:izstock/features/vendas/controllers/search_mercadoria_controller.dart';
-import 'package:izstock/features/vendas/views/widgets/mercadoria_list.dart';
+import 'package:izstock/features/vendas/controllers/carrinho/search_mercadoria_controller.dart';
+import 'package:izstock/features/vendas/views/widgets/carrinho/mercadoria_list.dart';
 
 class SearchMercadoriaPage extends ConsumerStatefulWidget {
   const SearchMercadoriaPage({super.key});
