@@ -38,7 +38,7 @@ class MercadoriaCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Valor: ${FormatterService.formatAsCurrency(mercadoria.valorVenda)}',
+                      'Valor: ${FormatterService.formatAsCurrency(mercadoria.valorVenda)} | Custo: ${FormatterService.formatAsCurrency(mercadoria.valorCusto)}',
                     ),
                     const SizedBox(height: 4),
                     Text('Qtd.: ${mercadoria.quantidade}'),
