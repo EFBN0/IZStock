@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:izstock/features/vendas/controllers/carrinho/carrinho_controller.dart';
 import 'package:izstock/features/vendas/controllers/carrinho/carrinho_state.dart';
+import 'package:izstock/features/vendas/controllers/carrinho/search_mercadoria_controller.dart';
 import 'package:izstock/features/vendas/models/meio_pagamento_enum.dart';
 import 'package:izstock/features/vendas/views/pages/search_mercadoria_page.dart';
 import 'package:izstock/features/vendas/views/widgets/carrinho/card_mercadoria_carrinho.dart';
@@ -66,9 +67,9 @@ class _CarrinhoPageState extends ConsumerState<CarrinhoPage> {
       }
 
       if (next is AsyncData) {
-        final estado = next.value!;
+        final state = next.value!;
 
-        switch (estado.status) {
+        switch (state.status) {
           case CarrinhoStatus.vendaFinalizada:
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
@@ -98,8 +99,18 @@ class _CarrinhoPageState extends ConsumerState<CarrinhoPage> {
             );
             break;
 
-          case CarrinhoStatus.ocioso:
           case CarrinhoStatus.erro:
+            ScaffoldMessenger.of(context).clearSnackBars();
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.mensagemErro!),
+                duration: Duration(seconds: 1),
+                backgroundColor: Theme.of(context).colorScheme.error,
+              ),
+            );
+            break;
+
+          case CarrinhoStatus.ocioso:
             break;
         }
       }
@@ -166,6 +177,7 @@ class _CarrinhoPageState extends ConsumerState<CarrinhoPage> {
                   children: [
                     OutlinedButton.icon(
                       onPressed: () {
+                        ref.read(termoBuscaProvider.notifier).state = '';
                         Navigator.push(
                           context,
                           MaterialPageRoute(

@@ -10,31 +10,47 @@ class EstoqueCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      clipBehavior: Clip.antiAlias,
       color: Theme.of(context).colorScheme.secondaryContainer,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      child: IntrinsicHeight(
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  estoque.titulo,
-                  style: Theme.of(context).textTheme.titleMedium!,
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 10,
                 ),
-                const SizedBox(height: 6),
-                Text('Itens: ${estoque.quantidadeItens}'),
-              ],
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      estoque.titulo,
+                      style: Theme.of(context).textTheme.titleMedium!,
+                    ),
+                    const SizedBox(height: 4),
+                    Text('Itens: ${estoque.quantidadeItens}'),
+                  ],
+                ),
+              ),
             ),
-            IconButton.outlined(
-              onPressed: () {
-                onDelete(estoque.id!);
-              },
-              icon: const Icon(
-                Icons.delete,
-                size: 20,
-                color: Color.fromARGB(255, 150, 24, 24),
+            Material(
+              color: Theme.of(context).colorScheme.error,
+              child: InkWell(
+                onTap: () {
+                  onDelete(estoque.id!);
+                },
+                child: SizedBox(
+                  width: 50,
+                  child: Center(
+                    child: Icon(
+                      Icons.delete,
+                      size: 20,
+                      color: Theme.of(context).colorScheme.onError,
+                    ),
+                  ),
+                ),
               ),
             ),
           ],

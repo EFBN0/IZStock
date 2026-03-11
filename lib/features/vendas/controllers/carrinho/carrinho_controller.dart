@@ -23,11 +23,22 @@ class CarrinhoController extends AsyncNotifier<CarrinhoState> {
   void addMercadoriaToCarrinho(Mercadoria mercadoria) {
     final currentList = state.value!.mercadoriaList;
 
-    final mercadoriaAlreadyAdded = currentList
+    final mercadoriaVenda = currentList
         .where((m) => m.mercadoriaId == mercadoria.id)
-        .isNotEmpty;
+        .firstOrNull;
 
-    if (mercadoriaAlreadyAdded) {
+    if (mercadoriaVenda != null) {
+      final hasEstoque = mercadoriaVenda.quantidade < mercadoria.quantidade;
+      if (!hasEstoque) {
+        state = AsyncData(
+          state.value!.copyWith(
+            mensagemErro: 'Limite de estoque atingido para esta mercadoria',
+            status: CarrinhoStatus.erro,
+          ),
+        );
+        return;
+      }
+
       final index = currentList.indexWhere(
         (m) => m.mercadoriaId == mercadoria.id,
       );
@@ -51,6 +62,10 @@ class CarrinhoController extends AsyncNotifier<CarrinhoState> {
         state.value!.copyWith(
           mercadoriaList: [...currentList, newMercadoriaVenda],
           status: CarrinhoStatus.itemAdicionado,
+          cacheMercadoriaList: [
+            ...state.value!.cacheMercadoriaList,
+            mercadoria,
+          ],
         ),
       );
     }
@@ -58,6 +73,25 @@ class CarrinhoController extends AsyncNotifier<CarrinhoState> {
 
   void incrementMercadoria(MercadoriaVenda item) {
     final currentList = state.value!.mercadoriaList;
+    final cacheMercadoriaList = state.value!.cacheMercadoriaList;
+
+    final hasEstoque =
+        item.quantidade <
+        cacheMercadoriaList
+            .where((m) => m.id == item.mercadoriaId)
+            .first
+            .quantidade;
+
+    if (!hasEstoque) {
+      state = AsyncData(
+        state.value!.copyWith(
+          mensagemErro: 'Limite de estoque atingido para esta mercadoria',
+          status: CarrinhoStatus.erro,
+        ),
+      );
+      return;
+    }
+
     final newList = [
       for (final m in currentList)
         if (m.mercadoriaId == item.mercadoriaId)

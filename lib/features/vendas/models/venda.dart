@@ -74,7 +74,8 @@ class Venda {
   }) {
     return Venda(
       id: id ?? this.id,
-      userId: userId ?? this.userId,data: data ?? this.data,
+      userId: userId ?? this.userId,
+      data: data ?? this.data,
       valorVendaTotal: valorVendaTotal ?? this.valorVendaTotal,
       valorCustoTotal: valorCustoTotal ?? this.valorCustoTotal,
       lucroTotal: lucroTotal ?? this.lucroTotal,

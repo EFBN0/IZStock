@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:izstock/features/commons/services/formatter_service.dart';
 import 'package:izstock/features/estoque/models/mercadoria.dart';
 
 class MercadoriaCard extends StatelessWidget {
   const MercadoriaCard({
     super.key,
     required this.mercadoria,
-    required this.onRemoveMercadoria
+    required this.onRemoveMercadoria,
   });
 
   final Mercadoria mercadoria;
@@ -14,36 +15,53 @@ class MercadoriaCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      clipBehavior: Clip.antiAlias,
       color: Theme.of(context).colorScheme.secondaryContainer,
-      child: Padding(
-        padding: EdgeInsetsGeometry.symmetric(
-          horizontal: 12,
-          vertical: 10,
-        ),
+      child: IntrinsicHeight(
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  mercadoria.titulo,
-                  style: Theme.of(context).textTheme.titleMedium!,
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 10,
                 ),
-                const SizedBox(height: 6),
-                Text('Valor: R\$ ${mercadoria.valorVenda.toStringAsFixed(2).replaceAll('.', ',')}'),
-                const SizedBox(height: 6),
-                Text('Qtd.: ${mercadoria.quantidade}'),
-              ],
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      mercadoria.titulo,
+                      style: Theme.of(context).textTheme.titleMedium!,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Valor: ${FormatterService.formatAsCurrency(mercadoria.valorVenda)}',
+                    ),
+                    const SizedBox(height: 4),
+                    Text('Qtd.: ${mercadoria.quantidade}'),
+                  ],
+                ),
+              ),
             ),
-            IconButton.outlined(
-              onPressed: () {
-                onRemoveMercadoria(mercadoria);
-              },
-              icon: const Icon(
-                Icons.delete,
-                size: 20,
-                color: Color.fromARGB(255, 150, 24, 24),
+            Material(
+              color: Theme.of(context).colorScheme.error,
+              child: InkWell(
+                onTap: () {
+                  onRemoveMercadoria(mercadoria);
+                },
+                child: SizedBox(
+                  width: 50,
+                  child: Center(
+                    child: Icon(
+                      Icons.delete,
+                      size: 20,
+                      color: Theme.of(context).colorScheme.onError,
+                    ),
+                  ),
+                ),
               ),
             ),
           ],

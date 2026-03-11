@@ -11,6 +11,8 @@ class Mercadoria {
   final double valorCusto;
   final int quantidade;
   final String? imagemUrl;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
 
   const Mercadoria({
     required this.id,
@@ -23,7 +25,27 @@ class Mercadoria {
     required this.valorCusto,
     required this.quantidade,
     this.imagemUrl,
+    this.createdAt,
+    this.updatedAt,
   });
+
+  Map<String, dynamic> toFirestore() {
+    return {
+      'estoqueId': estoqueId,
+      'userId': userId,
+      'codigo': codigo,
+      'titulo': titulo,
+      'descricao': descricao,
+      'valorVenda': valorVenda,
+      'valorCusto': valorCusto,
+      'quantidade': quantidade,
+      'imagemUrl': imagemUrl,
+      "createdAt": createdAt != null
+          ? Timestamp.fromDate(createdAt!)
+          : FieldValue.serverTimestamp(),
+      "updatedAt": FieldValue.serverTimestamp(),
+    };
+  }
 
   factory Mercadoria.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
@@ -38,27 +60,17 @@ class Mercadoria {
       valorCusto: (data['valorCusto'] ?? 0.0).toDouble(),
       quantidade: data['quantidade'] ?? 0,
       imagemUrl: data['imagemUrl'],
+      createdAt: (data['createdAt'] as Timestamp?)?.toDate(),
+      updatedAt: (data['updatedAt'] as Timestamp?)?.toDate(),
     );
-  }
-
-  Map<String, dynamic> toFirestore() {
-    return {
-      'estoqueId': estoqueId,
-      'userId': userId,
-      'codigo': codigo,
-      'titulo': titulo,
-      'descricao': descricao,
-      'valorVenda': valorVenda,
-      'valorCusto': valorCusto,
-      'quantidade': quantidade,
-      'imagemUrl': imagemUrl,
-    };
   }
 
   Mercadoria copyWith({
     String? id,
     String? estoqueId,
     String? userId,
+    DateTime? createdAt,
+    DateTime? updatedAt,
     String? codigo,
     String? titulo,
     String? descricao,
@@ -77,7 +89,9 @@ class Mercadoria {
       valorVenda: valorVenda ?? this.valorVenda,
       valorCusto: valorCusto ?? this.valorCusto,
       quantidade: quantidade ?? this.quantidade,
-      imagemUrl: imagemUrl ?? this.imagemUrl
+      imagemUrl: imagemUrl ?? this.imagemUrl,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
     );
   }
 }

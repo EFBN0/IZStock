@@ -80,7 +80,6 @@ class EstoquesPage extends ConsumerWidget {
       appBar: AppBar(
         elevation: 5.0,
         shadowColor: const Color.fromARGB(255, 0, 0, 0).withValues(alpha: 0.5),
-        centerTitle: true,
         title: Text('Estoques'),
         actions: [
           IconButton(
@@ -119,11 +118,11 @@ class EstoquesPage extends ConsumerWidget {
             );
           }
           return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 10),
             child: ListView.builder(
               itemCount: estoques.length,
               itemBuilder: (ctx, index) => Container(
-                margin: EdgeInsets.symmetric(vertical: 10),
+                margin: EdgeInsets.symmetric(vertical: 6),
                 child: GestureDetector(
                   onTap: () {
                     _selectEstoque(context, estoques[index]);

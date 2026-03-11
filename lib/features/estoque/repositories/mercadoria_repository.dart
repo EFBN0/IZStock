@@ -19,10 +19,15 @@ class MercadoriaRepository extends BaseRepository {
   }
 
   Stream<List<Mercadoria>> findMercadoriasByEstoque(String estoqueId) {
-    return _getMercadoriaRef(estoqueId).orderBy('titulo').snapshots().map((
-      snapshot,
-    ) {
-      return snapshot.docs.map((doc) => doc.data()).toList();
+    return _getMercadoriaRef(estoqueId).snapshots().map((snapshot) {
+      final lista = snapshot.docs.map((doc) => doc.data()).toList();
+      lista.sort((a, b) {
+        final dateA = a.updatedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+        final dateB = b.updatedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+        return dateB.compareTo(dateA);
+      });
+
+      return lista;
     });
   }
 
@@ -42,7 +47,8 @@ class MercadoriaRepository extends BaseRepository {
   Future<void> addMercadoria(String estoqueId, Mercadoria mercadoria) async {
     final mercadoriaRef = _getMercadoriaRef(estoqueId).doc();
     final batch = firestore.batch();
-    batch.set(mercadoriaRef, mercadoria.copyWith(userId: userId));
+    final novaMercadoria = mercadoria.copyWith(userId: userId);
+    batch.set(mercadoriaRef, novaMercadoria);
     batch.update(
       firestore
           .collection('users')

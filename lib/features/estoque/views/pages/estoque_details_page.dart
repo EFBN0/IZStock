@@ -31,7 +31,11 @@ class EstoqueDetailsPage extends ConsumerWidget {
     final mercadoriaAsyncList = ref.watch(mercadoriaListProvider(estoque.id!));
 
     return Scaffold(
-      appBar: AppBar(title: Text('Estoque: ${estoque.titulo}')),
+      appBar: AppBar(
+        title: Text('Estoque: ${estoque.titulo}'),
+        elevation: 5.0,
+        shadowColor: const Color.fromARGB(255, 0, 0, 0).withValues(alpha: 0.5),
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           _touchMercadoria(context, null);
@@ -57,11 +61,11 @@ class EstoqueDetailsPage extends ConsumerWidget {
             );
           }
           return Padding(
-            padding: EdgeInsetsGeometry.symmetric(horizontal: 20, vertical: 16),
+            padding: EdgeInsetsGeometry.symmetric(vertical: 16, horizontal: 10),
             child: ListView.builder(
               itemCount: mercadorias.length,
               itemBuilder: (ctx, index) => Container(
-                margin: EdgeInsets.symmetric(vertical: 10),
+                margin: EdgeInsets.symmetric(vertical: 6),
                 child: GestureDetector(
                   onTap: () {
                     _touchMercadoria(context, mercadorias[index]);

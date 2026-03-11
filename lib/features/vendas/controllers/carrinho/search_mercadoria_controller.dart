@@ -12,9 +12,7 @@ final mercadoriasProvider = StreamProvider<List<Mercadoria>>((ref) {
   return repository.findAllMercadorias();
 });
 
-final mercadoriasFiltradasProvider = Provider<AsyncValue<List<Mercadoria>>>((
-  ref,
-) {
+final mercadoriasFiltradasProvider = Provider<AsyncValue<List<Mercadoria>>>((ref) {
   final termo = ref.watch(termoBuscaProvider).toLowerCase();
   final allMercadorias = ref.watch(mercadoriasProvider);
 
