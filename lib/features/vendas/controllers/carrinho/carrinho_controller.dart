@@ -152,7 +152,15 @@ class CarrinhoController extends AsyncNotifier<CarrinhoState> {
     );
   }
 
-  double get valorTotal {
+  void addDesconto(double valor) {
+    if (state.value != null) {
+      state = AsyncData(state.value!.copyWith(
+        desconto: valor,
+      ));
+    }
+  }
+
+  double get subtotal {
     final currentList = state.value!.mercadoriaList;
     if (currentList.isEmpty) return 0.0;
 
@@ -162,42 +170,52 @@ class CarrinhoController extends AsyncNotifier<CarrinhoState> {
     );
   }
 
+  double get valorTotal {
+    final desconto = state.value!.desconto;
+    if (desconto == 0.0) {
+      return subtotal;
+    }
+
+    return (subtotal - desconto) < 0 ? 0.0 : (subtotal - desconto);
+  }
+
   Future<void> finalizarVenda({required MeioPagamento meioPagamento}) async {
+    final currentState = state.value!;
+    final currentList = currentState.mercadoriaList;
+    final desconto = currentState.desconto;
+
+    if (currentList.isEmpty) return;
+
     state = const AsyncLoading();
 
     double? lat;
     double? long;
 
-    try {
-      final position = await LocationService.getLocalizacaoAtual();
-      lat = position.latitude;
-      long = position.longitude;
-    } catch (e) {
-      debugPrint('Erro ao obter localização: $e');
-    }
-
-    final currentList = state.value!.mercadoriaList;
-    if (currentList.isEmpty) return;
+    // try {
+    //   final position = await LocationService.getLocalizacaoAtual();
+    //   lat = position.latitude;
+    //   long = position.longitude;
+    // } catch (e) {
+    //   debugPrint('Erro ao obter localização: $e');
+    // }
 
     final vendaRepository = ref.read(vendaRepositoryProvider);
 
-    double valorTotal = 0;
-    double custoTotal = 0;
-
-    for (var item in currentList) {
-      valorTotal += item.valorVenda * item.quantidade;
-      custoTotal += item.valorCusto * item.quantidade;
-    }
-
-    final lucroTotal = valorTotal - custoTotal;
+    double valorVendaFinal = valorTotal;
+    double custoTotal = currentList.fold(
+      0.0,
+      (total, item) => total + (item.valorCusto * item.quantidade),
+    );
+    final lucroTotalFinal = valorVendaFinal - custoTotal;
 
     final novaVenda = Venda(
       id: const Uuid().v4(),
       userId: '',
       data: DateTime.now(),
-      valorVendaTotal: valorTotal,
+      valorVendaTotal: valorVendaFinal,
       valorCustoTotal: custoTotal,
-      lucroTotal: lucroTotal,
+      lucroTotal: lucroTotalFinal,
+      desconto: desconto,
       meioPagamento: meioPagamento,
       itens: currentList,
       latitude: lat,
@@ -205,9 +223,10 @@ class CarrinhoController extends AsyncNotifier<CarrinhoState> {
     );
 
     state = await AsyncValue.guard(() async {
-      await vendaRepository.registrarVenda(novaVenda);
-      return state.value!.copyWith(
+      await vendaRepository.registrarVenda(novaVenda);  
+      return currentState.copyWith(
         mercadoriaList: [],
+        desconto: 0.0,
         status: CarrinhoStatus.vendaFinalizada,
       );
     });

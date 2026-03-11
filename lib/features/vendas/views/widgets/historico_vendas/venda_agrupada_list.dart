@@ -111,6 +111,9 @@ class CardVendaExpansivel extends StatelessWidget {
       (sum, item) => sum + item.quantidade,
     );
 
+    final bool hasDesconto = venda.desconto > 0;
+    final double subtotal = venda.valorVendaTotal + venda.desconto;
+
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 6),
       elevation: 1,
@@ -146,9 +149,27 @@ class CardVendaExpansivel extends StatelessWidget {
               ),
             ],
           ),
-          subtitle: Text(
-            '$qtdTotalItens itens • Detalhar',
-            style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+          subtitle: Row(
+            children: [
+              Text(
+                '$qtdTotalItens itens • Detalhar',
+                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+              ),
+              if (hasDesconto) ...[
+                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: Colors.redAccent.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: const Text(
+                    'Com desconto',
+                    style: TextStyle(fontSize: 10, color: Colors.redAccent, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ]
+            ],
           ),
           children: [
             Container(
@@ -193,6 +214,38 @@ class CardVendaExpansivel extends StatelessWidget {
                       ),
                     ),
                   ),
+
+                  if (hasDesconto) ...[
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 8.0),
+                      child: Divider(height: 1),
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('Subtotal', style: TextStyle(fontSize: 13, color: Colors.grey[700])),
+                        Text(
+                          FormatterService.formatAsCurrency(subtotal),
+                          style: TextStyle(fontSize: 13, color: Colors.grey[700]),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text('Desconto', style: TextStyle(fontSize: 13, color: Colors.redAccent)),
+                        Text(
+                          '- ${FormatterService.formatAsCurrency(venda.desconto)}',
+                          style: const TextStyle(
+                            fontSize: 13, 
+                            color: Colors.redAccent, 
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ],
               ),
             ),

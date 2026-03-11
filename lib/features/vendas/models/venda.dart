@@ -9,6 +9,7 @@ class Venda {
   final double valorVendaTotal;
   final double valorCustoTotal;
   final double lucroTotal;
+  final double desconto;
   final MeioPagamento meioPagamento;
   final List<MercadoriaVenda> itens;
   final double? latitude;
@@ -21,6 +22,7 @@ class Venda {
     required this.valorVendaTotal,
     required this.valorCustoTotal,
     required this.lucroTotal,
+    this.desconto = 0.0,
     required this.meioPagamento,
     required this.itens,
     this.latitude,
@@ -34,6 +36,7 @@ class Venda {
       'valorVendaTotal': valorVendaTotal,
       'valorCustoTotal': valorCustoTotal,
       'lucroTotal': lucroTotal,
+      'desconto': desconto,
       'meioPagamento': meioPagamento.name,
       'itens': itens.map((item) => item.toMap()).toList(),
       'latitude': latitude,
@@ -50,6 +53,7 @@ class Venda {
       valorVendaTotal: (data['valorVendaTotal'] ?? 0.0).toDouble(),
       valorCustoTotal: (data['valorCustoTotal'] ?? 0.0).toDouble(),
       lucroTotal: (data['lucroTotal'] ?? 0.0).toDouble(),
+      desconto: (data['desconto'] ?? 0.0).toDouble(),
       meioPagamento: MeioPagamento.fromString(data['meioPagamento']),
       itens: (data['itens'] as List<dynamic>?)
               ?.map((item) => MercadoriaVenda.fromMap(item as Map<String, dynamic>))
@@ -67,6 +71,7 @@ class Venda {
     double? valorVendaTotal,
     double? valorCustoTotal,
     double? lucroTotal,
+    double? desconto,
     MeioPagamento? meioPagamento,
     List<MercadoriaVenda>? itens,
     double? latitude,
@@ -79,6 +84,7 @@ class Venda {
       valorVendaTotal: valorVendaTotal ?? this.valorVendaTotal,
       valorCustoTotal: valorCustoTotal ?? this.valorCustoTotal,
       lucroTotal: lucroTotal ?? this.lucroTotal,
+      desconto: desconto ?? this.desconto,
       meioPagamento: meioPagamento ?? this.meioPagamento,
       itens: itens ?? this.itens,
       latitude: latitude ?? this.latitude,
