@@ -72,15 +72,32 @@ class _FormMercadoriaState extends ConsumerState<FormMercadoria> {
 
     _form.currentState!.save();
 
-    ref
-        .read(mercadoriaControllerProvider.notifier)
-        .addMercadoria(
-          estoqueId: widget.estoque.id!,
-          titulo: _tituloController.text,
-          valorVenda: toCurrencyDouble(_valorVendaController.text),
-          valorCusto: toCurrencyDouble(_valorCustoController.text),
-          quantidade: int.parse(_quantidadeController.text),
-        );
+    final controller = ref.read(mercadoriaControllerProvider.notifier);
+    final titulo = _tituloController.text;
+    final descricao = _descricaoController.text;
+    final valorVenda = toCurrencyDouble(_valorVendaController.text);
+    final valorCusto = toCurrencyDouble(_valorCustoController.text);
+    final quantidade = int.parse(_quantidadeController.text);
+
+    if (widget.mercadoria != null) {
+      controller.updateMercadoria(
+        mercadoria: widget.mercadoria!,
+        titulo: titulo,
+        descricao: descricao,
+        valorVenda: valorVenda,
+        valorCusto: valorCusto,
+        quantidade: quantidade,
+      );
+    } else {
+      controller.addMercadoria(
+        estoqueId: widget.estoque.id!,
+        titulo: titulo,
+        descricao: descricao,
+        valorVenda: valorVenda,
+        valorCusto: valorCusto,
+        quantidade: quantidade,
+      );
+    }
 
     Navigator.of(context).pop();
   }

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:izstock/features/estoque/controllers/mercadoria_controller.dart';
 import 'package:izstock/features/estoque/models/estoque.dart';
 import 'package:izstock/features/estoque/models/mercadoria.dart';
+import 'package:izstock/features/estoque/models/ordenacao_mercadoria.dart';
 import 'package:izstock/features/estoque/views/widgets/mercadoria_card.dart';
 import 'package:izstock/features/estoque/views/widgets/form_mercadoria.dart';
 import 'dart:async';
@@ -56,12 +57,31 @@ class _EstoqueDetailsPageState extends ConsumerState<EstoqueDetailsPage> {
   @override
   Widget build(BuildContext context) {
     final mercadoriaAsyncList = ref.watch(filteredMercadoriaListProvider(widget.estoque.id!));
+    final ordenacao = ref.watch(ordenacaoMercadoriaProvider);
 
     return Scaffold(
       appBar: AppBar(
         title: Text('Estoque: ${widget.estoque.titulo}'),
         elevation: 5.0,
         shadowColor: const Color.fromARGB(255, 0, 0, 0).withValues(alpha: 0.5),
+        actions: [
+          PopupMenuButton<OrdenacaoMercadoria>(
+            icon: const Icon(Icons.sort),
+            tooltip: 'Ordenar',
+            initialValue: ordenacao,
+            onSelected: (value) {
+              ref.read(ordenacaoMercadoriaProvider.notifier).state = value;
+            },
+            itemBuilder: (ctx) => [
+              for (final opcao in OrdenacaoMercadoria.values)
+                CheckedPopupMenuItem(
+                  value: opcao,
+                  checked: opcao == ordenacao,
+                  child: Text(opcao.label),
+                ),
+            ],
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {

@@ -20,14 +20,7 @@ class MercadoriaRepository extends BaseRepository {
 
   Stream<List<Mercadoria>> findMercadoriasByEstoque(String estoqueId) {
     return _getMercadoriaRef(estoqueId).snapshots().map((snapshot) {
-      final lista = snapshot.docs.map((doc) => doc.data()).toList();
-      lista.sort((a, b) {
-        final dateA = a.updatedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
-        final dateB = b.updatedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
-        return dateB.compareTo(dateA);
-      });
-
-      return lista;
+      return snapshot.docs.map((doc) => doc.data()).toList();
     });
   }
 
@@ -61,10 +54,34 @@ class MercadoriaRepository extends BaseRepository {
     await batch.commit();
   }
 
-  Future<void> updateMercadoria(Mercadoria mercadoria) async {
-    await _getMercadoriaRef(
-      mercadoria.estoqueId,
-    ).doc(mercadoria.id).set(mercadoria);
+  Future<void> updateMercadoria(
+    Mercadoria mercadoria, {
+    required int quantidadeAnterior,
+  }) async {
+    final batch = firestore.batch();
+
+    batch.update(_getMercadoriaRef(mercadoria.estoqueId).doc(mercadoria.id), {
+      'titulo': mercadoria.titulo,
+      'descricao': mercadoria.descricao,
+      'valorVenda': mercadoria.valorVenda,
+      'valorCusto': mercadoria.valorCusto,
+      'quantidade': mercadoria.quantidade,
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+
+    final diferencaQuantidade = mercadoria.quantidade - quantidadeAnterior;
+    if (diferencaQuantidade != 0) {
+      batch.update(
+        firestore
+            .collection('users')
+            .doc(userId)
+            .collection('estoques')
+            .doc(mercadoria.estoqueId),
+        {'quantidadeItens': FieldValue.increment(diferencaQuantidade)},
+      );
+    }
+
+    await batch.commit();
   }
 
   Future<void> updateQuantidadeMercadoria(
