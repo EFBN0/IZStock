@@ -13,14 +13,12 @@ class DashboardPage extends ConsumerWidget {
       length: 3,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Dashboard analítico'),
-          elevation: 0,
-          bottom: TabBar(
-            indicatorColor: Theme.of(context).colorScheme.primary,
+          title: const Text('Painel'),
+          bottom: const TabBar(
             tabs: [
-              Tab(icon: Icon(Icons.attach_money), text: 'Resumo'),
-              Tab(icon: Icon(Icons.map_outlined), text: 'Mapa'),
-              Tab(icon: Icon(Icons.lightbulb_outline), text: 'Dicas'),
+              Tab(text: 'Resumo'),
+              Tab(text: 'Mapa'),
+              Tab(text: 'Dicas'),
             ],
           ),
         ),

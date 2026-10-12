@@ -1,42 +1,59 @@
 import 'package:flutter/material.dart';
 
-class SearchInput extends StatelessWidget {
-  final String placeholder;
-  final String? q;
-  final Function()? onTap;
-  final Function(BuildContext, String, TextEditingController)? onInputTextChanged;
-  final FocusNode? focusNode;
-
+class SearchInput extends StatefulWidget {
   const SearchInput({
-    required this.placeholder,
-    this.q,
-    this.onTap,
-    this.onInputTextChanged,
-    this.focusNode,
     super.key,
+    required this.placeholder,
+    required this.onChanged,
+    this.autofocus = false,
   });
+
+  final String placeholder;
+  final void Function(String) onChanged;
+  final bool autofocus;
+
+  @override
+  State<SearchInput> createState() => _SearchInputState();
+}
+
+class _SearchInputState extends State<SearchInput> {
+  final _controller = TextEditingController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _onChanged(String value) {
+    setState(() {});
+    widget.onChanged(value);
+  }
 
   @override
   Widget build(BuildContext context) {
-    final TextEditingController controller = TextEditingController(
-      text: q ?? '',
-    );
-
-    final textField = TextField(
-      controller: controller,
-      focusNode: focusNode,
+    return TextField(
+      controller: _controller,
+      autofocus: widget.autofocus,
       autocorrect: false,
       enableSuggestions: false,
-      keyboardType: TextInputType.text,
+      textInputAction: TextInputAction.search,
+      onChanged: _onChanged,
+      onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
       decoration: InputDecoration(
-        filled: false,
-        prefixIcon: const Icon(Icons.search),
-        hintText: placeholder,
+        hintText: widget.placeholder,
+        prefixIcon: const Icon(Icons.search_rounded),
+        contentPadding: const EdgeInsets.symmetric(vertical: 14),
+        suffixIcon: _controller.text.isEmpty
+            ? null
+            : IconButton(
+                icon: const Icon(Icons.close_rounded, size: 20),
+                onPressed: () {
+                  _controller.clear();
+                  _onChanged('');
+                },
+              ),
       ),
-      onTap: onTap ?? () => {},
-      onChanged: (value) => onInputTextChanged!(context, value, controller),
     );
-    focusNode?.requestFocus();
-    return textField;
   }
 }

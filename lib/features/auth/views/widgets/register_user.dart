@@ -60,12 +60,16 @@ class _RegisterState extends State<Register> {
       key: _form,
       child: Column(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           TextFormField(
             onTapOutside: (event) {
               _unfocus();
             },
-            decoration: InputDecoration(labelText: 'Email', filled: false),
+            decoration: const InputDecoration(
+              labelText: 'Email',
+              prefixIcon: Icon(Icons.mail_outline_rounded),
+            ),
             keyboardType: TextInputType.emailAddress,
             autocorrect: false,
             textCapitalization: TextCapitalization.none,
@@ -81,12 +85,15 @@ class _RegisterState extends State<Register> {
               _enteredEmail = value!;
             },
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 12),
           TextFormField(
             onTapOutside: (event) {
               _unfocus();
             },
-            decoration: InputDecoration(labelText: 'Senha', filled: false),
+            decoration: const InputDecoration(
+              labelText: 'Senha',
+              prefixIcon: Icon(Icons.lock_outline_rounded),
+            ),
             obscureText: true,
             validator: (value) {
               if (value == null || value.trim().length < 6) {
@@ -98,14 +105,14 @@ class _RegisterState extends State<Register> {
               _enteredPassword = value!;
             },
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 12),
           TextFormField(
             onTapOutside: (event) {
               _unfocus();
             },
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               labelText: 'Confirme sua senha',
-              filled: false,
+              prefixIcon: Icon(Icons.lock_outline_rounded),
             ),
             obscureText: true,
             validator: (value) {
@@ -119,15 +126,9 @@ class _RegisterState extends State<Register> {
             },
           ),
           const SizedBox(height: 20),
-          ElevatedButton(
+          FilledButton(
             onPressed: _submit,
-            style: ElevatedButton.styleFrom(
-              padding: EdgeInsets.symmetric(horizontal: 30, vertical: 12),
-              backgroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
-              foregroundColor: Theme.of(context).colorScheme.primaryContainer,
-              textStyle: TextStyle(fontSize: 24),
-            ),
-            child: Text('Cadastrar'),
+            child: Text('Criar conta'),
           ),
         ],
       ),

@@ -25,60 +25,114 @@ class _AuthPageState extends State<AuthPage> {
 
   @override
   Widget build(BuildContext context) {
-    Widget authNavigationOption;
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    Widget? authNavigationOption;
     Widget mainContent;
+    String subtitulo;
 
     if (_pageMode == AuthPageModeEnum.login) {
-      authNavigationOption = TextButton(onPressed: () {
-        _setPageMode(AuthPageModeEnum.register);
-      }, child: Text('Ainda não possui uma conta? Cadastre-se!'));
-
-      mainContent = Login();
+      subtitulo = 'Entre para continuar';
+      mainContent = const Login();
+      authNavigationOption = _buildAlternarModo(
+        'Ainda não tem conta?',
+        'Criar conta',
+        AuthPageModeEnum.register,
+      );
     } else if (_pageMode == AuthPageModeEnum.register) {
-      authNavigationOption = TextButton(onPressed: () {
-        _setPageMode(AuthPageModeEnum.login);
-      }, child: Text('Já possuo uma conta!'));
-
-      mainContent = Register();
+      subtitulo = 'Crie sua conta gratuita';
+      mainContent = const Register();
+      authNavigationOption = _buildAlternarModo(
+        'Já tem uma conta?',
+        'Entrar',
+        AuthPageModeEnum.login,
+      );
     } else {
-      authNavigationOption = const SizedBox.shrink();
+      subtitulo = 'Controle de estoque e vendas';
       mainContent = AuthPageOptionsWrapper(onPageModeChange: _setPageMode);
     }
 
-    return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.primaryContainer,
-        ),
-        child: Center(
-          child: Padding(
-            padding: EdgeInsetsGeometry.symmetric(horizontal: 30),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.warehouse,
-                  color: Theme.of(context).colorScheme.onPrimaryContainer,
-                  size: 40,
+    return PopScope(
+      canPop: _pageMode == AuthPageModeEnum.initial,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _setPageMode(AuthPageModeEnum.initial);
+      },
+      child: Scaffold(
+        body: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 420),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 64,
+                        height: 64,
+                        decoration: BoxDecoration(
+                          color: colorScheme.primary,
+                          borderRadius: BorderRadius.circular(18),
+                        ),
+                        child: Icon(
+                          Icons.inventory_2_rounded,
+                          color: colorScheme.onPrimary,
+                          size: 32,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Text(
+                      'IZStock',
+                      textAlign: TextAlign.center,
+                      style: textTheme.headlineMedium!.copyWith(
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      subtitulo,
+                      textAlign: TextAlign.center,
+                      style: textTheme.bodyLarge!.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    const SizedBox(height: 36),
+                    mainContent,
+                    if (authNavigationOption != null) ...[
+                      const SizedBox(height: 16),
+                      authNavigationOption,
+                    ],
+                  ],
                 ),
-                Text(
-                  'IZStock App',
-                  style: Theme.of(context).textTheme.headlineLarge!.copyWith(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 32,
-                    color: Theme.of(context).colorScheme.onPrimaryContainer,
-                  ),
-                ),
-                const SizedBox(height: 40),
-                SingleChildScrollView(child: mainContent),
-                if (_pageMode != AuthPageModeEnum.initial)
-                  const SizedBox(height: 10,),
-                authNavigationOption
-              ],
+              ),
             ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildAlternarModo(
+    String pergunta,
+    String acao,
+    AuthPageModeEnum destino,
+  ) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          pergunta,
+          style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+        ),
+        TextButton(
+          onPressed: () => _setPageMode(destino),
+          child: Text(acao),
+        ),
+      ],
     );
   }
 }

@@ -11,12 +11,14 @@ class ScreenNavigationItem {
     required this.title,
     required this.label,
     required this.icon,
+    required this.selectedIcon,
   });
 
   final Widget screen;
   final String title;
   final String label;
-  final Icon icon;
+  final IconData icon;
+  final IconData selectedIcon;
 }
 
 class MainNavigationScreen extends StatefulWidget {
@@ -36,54 +38,69 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       screen: EstoquesPage(),
       title: 'Meus estoques',
       label: 'Estoque',
-      icon: Icon(Icons.warehouse),
+      icon: Icons.inventory_2_outlined,
+      selectedIcon: Icons.inventory_2_rounded,
     ),
     const ScreenNavigationItem(
       screen: HistoricoVendasPage(),
       title: 'Histórico de vendas',
       label: 'Histórico',
-      icon: Icon(Icons.receipt),
+      icon: Icons.receipt_long_outlined,
+      selectedIcon: Icons.receipt_long_rounded,
     ),
     const ScreenNavigationItem(
       screen: CarrinhoPage(),
       title: 'Carrinho',
       label: 'Vender',
-      icon: Icon(Icons.shopping_cart_outlined),
+      icon: Icons.point_of_sale_outlined,
+      selectedIcon: Icons.point_of_sale_rounded,
     ),
     const ScreenNavigationItem(
       screen: DashboardPage(),
       title: 'Dashboard',
-      label: 'Dashboard',
-      icon: Icon(Icons.insert_chart_outlined_rounded),
+      label: 'Painel',
+      icon: Icons.insights_outlined,
+      selectedIcon: Icons.insights_rounded,
     ),
     const ScreenNavigationItem(
       screen: SettingsScreen(),
       title: 'Configurações',
-      label: 'Configurações',
-      icon: Icon(Icons.settings),
+      label: 'Ajustes',
+      icon: Icons.settings_outlined,
+      selectedIcon: Icons.settings_rounded,
     ),
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _screens[_selectedScreenIndex].screen,
-      bottomNavigationBar: BottomNavigationBar(
-        onTap: (index) {
-          setState(() {
-            _selectedScreenIndex = index;
-          });
-        },
-        currentIndex: _selectedScreenIndex,
-        items: _screens
-            .map(
-              (screen) => BottomNavigationBarItem(
-                backgroundColor: Theme.of(context).colorScheme.primary,
-                label: screen.label,
-                icon: screen.icon,
-              ),
-            )
-            .toList(),
+      body: IndexedStack(
+        index: _selectedScreenIndex,
+        children: _screens.map((item) => item.screen).toList(),
+      ),
+      bottomNavigationBar: DecoratedBox(
+        decoration: BoxDecoration(
+          border: Border(
+            top: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
+          ),
+        ),
+        child: NavigationBar(
+          selectedIndex: _selectedScreenIndex,
+          onDestinationSelected: (index) {
+            setState(() {
+              _selectedScreenIndex = index;
+            });
+          },
+          destinations: _screens
+              .map(
+                (item) => NavigationDestination(
+                  label: item.label,
+                  icon: Icon(item.icon),
+                  selectedIcon: Icon(item.selectedIcon),
+                ),
+              )
+              .toList(),
+        ),
       ),
     );
   }

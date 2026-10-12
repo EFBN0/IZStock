@@ -33,7 +33,9 @@ class GraficoVendasSemanal extends StatelessWidget {
       });
     }
 
-    final maxY = maxValor * 1.2; 
+    final maxY = maxValor * 1.2;
+    final colorScheme = Theme.of(context).colorScheme;
+    final labelStyle = TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 10);
 
     return AspectRatio(
       aspectRatio: 1.7,
@@ -46,7 +48,7 @@ class GraficoVendasSemanal extends StatelessWidget {
             drawVerticalLine: false,
             horizontalInterval: maxY == 0 ? 20 : maxY / 5,
             getDrawingHorizontalLine: (value) => FlLine(
-              color: Colors.grey.withValues(alpha: 0.1),
+              color: colorScheme.outlineVariant,
               strokeWidth: 1,
             ),
           ),
@@ -62,10 +64,10 @@ class GraficoVendasSemanal extends StatelessWidget {
                   if (value == 0) return const SizedBox.shrink();
                   if (value >= 1000) {
                     return Text('${(value / 1000).toStringAsFixed(1)}k', 
-                      style: const TextStyle(color: Colors.grey, fontSize: 10));
+                      style: labelStyle);
                   }
                   return Text(value.toInt().toString(), 
-                      style: const TextStyle(color: Colors.grey, fontSize: 10));
+                      style: labelStyle);
                 },
               ),
             ),
@@ -79,9 +81,9 @@ class GraficoVendasSemanal extends StatelessWidget {
                       padding: const EdgeInsets.only(top: 8.0),
                       child: Text(
                         dadosProcessados[index]['dia'],
-                        style: const TextStyle(
-                          color: Colors.grey,
-                          fontWeight: FontWeight.bold,
+                        style: TextStyle(
+                          color: colorScheme.onSurfaceVariant,
+                          fontWeight: FontWeight.w500,
                           fontSize: 12,
                         ),
                       ),
@@ -99,16 +101,16 @@ class GraficoVendasSemanal extends StatelessWidget {
               barRods: [
                 BarChartRodData(
                   toY: dado['valor'],
-                  color: Colors.deepPurple,
-                  width: 16,
+                  color: colorScheme.primary,
+                  width: 18,
                   borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(4),
-                    topRight: Radius.circular(4),
+                    topLeft: Radius.circular(6),
+                    topRight: Radius.circular(6),
                   ),
                   backDrawRodData: BackgroundBarChartRodData(
                     show: true,
                     toY: maxY == 0 ? 100 : maxY,
-                    color: Colors.grey.withValues(alpha: 0.1),
+                    color: colorScheme.surfaceContainerLow,
                   ),
                 ),
               ],
@@ -124,8 +126,8 @@ class GraficoVendasSemanal extends StatelessWidget {
               getTooltipItem: (group, groupIndex, rod, rodIndex) {
                 return BarTooltipItem(
                   rod.toY > 0 ? 'R\$ ${rod.toY.toInt()}' : '',
-                  const TextStyle(
-                    color: Colors.deepPurple,
+                  TextStyle(
+                    color: colorScheme.primary,
                     fontWeight: FontWeight.bold,
                     fontSize: 10,
                   ),

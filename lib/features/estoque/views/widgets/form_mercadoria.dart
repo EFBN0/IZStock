@@ -104,92 +104,105 @@ class _FormMercadoriaState extends ConsumerState<FormMercadoria> {
 
   @override
   Widget build(BuildContext context) {
-    return Form(
-      key: _form,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 50, 16, 16),
-        child: Column(
-          children: [
-            Text(
-              widget.mercadoria != null
-                  ? 'Editar mercadoria'
-                  : 'Nova mercadoria',
-              style: Theme.of(context).textTheme.titleLarge!.copyWith(),
-            ),
-            const SizedBox(height: 16),
-            const Icon(Icons.image),
-            const Text('Seletor de imagem aqui'),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _tituloController,
-              decoration: InputDecoration(label: Text('Título'), filled: false),
-              validator: (value) {
-                if (value == null) {
-                  return 'Campo Título obrigatório';
-                }
-                return null;
-              },
-              onSaved: (value) {},
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _descricaoController,
-              decoration: InputDecoration(
-                label: Text('Descrição'),
-                filled: false,
-              ),
-              onSaved: (value) {},
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _valorCustoController,
-              decoration: InputDecoration(
-                label: Text('Preço de custo'),
-                filled: false,
-              ),
-              keyboardType: TextInputType.numberWithOptions(decimal: true),
-              inputFormatters: [_currencyFormatter],
-              onSaved: (value) {},
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _valorVendaController,
-              decoration: InputDecoration(
-                label: Text('Preço de venda'),
-                filled: false,
-              ),
-              keyboardType: TextInputType.numberWithOptions(decimal: true),
-              inputFormatters: [_currencyFormatter],
-              onSaved: (value) {},
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _quantidadeController,
-              decoration: InputDecoration(
-                label: Text('Quantidade'),
-                filled: false,
-              ),
-              keyboardType: TextInputType.number,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              onSaved: (value) {},
-            ),
-            const SizedBox(height: 30),
-            Row(
-              children: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: const Text('Cancelar'),
+    final textTheme = Theme.of(context).textTheme;
+    final editMode = widget.mercadoria != null;
+
+    return Padding(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+        child: Form(
+          key: _form,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                editMode ? 'Editar mercadoria' : 'Nova mercadoria',
+                style: textTheme.titleLarge!.copyWith(
+                  fontWeight: FontWeight.w700,
                 ),
-                const Spacer(),
-                ElevatedButton(
-                  onPressed: _saveMercadoria,
-                  child: const Text('Salvar'),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                widget.estoque.titulo,
+                style: textTheme.bodyMedium!.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
-              ],
-            ),
-          ],
+              ),
+              const SizedBox(height: 20),
+              TextFormField(
+                controller: _tituloController,
+                textCapitalization: TextCapitalization.sentences,
+                decoration: const InputDecoration(labelText: 'Nome'),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Informe o nome da mercadoria';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _descricaoController,
+                textCapitalization: TextCapitalization.sentences,
+                decoration: const InputDecoration(
+                  labelText: 'Descrição (opcional)',
+                ),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: _valorCustoController,
+                      decoration: const InputDecoration(labelText: 'Custo'),
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      inputFormatters: [_currencyFormatter],
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextFormField(
+                      controller: _valorVendaController,
+                      decoration: const InputDecoration(
+                        labelText: 'Preço de venda',
+                      ),
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      inputFormatters: [_currencyFormatter],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _quantidadeController,
+                decoration: const InputDecoration(
+                  labelText: 'Quantidade em estoque',
+                ),
+                keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Informe a quantidade';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 24),
+              FilledButton(
+                onPressed: _saveMercadoria,
+                child: Text(editMode ? 'Salvar alterações' : 'Adicionar'),
+              ),
+            ],
+          ),
         ),
       ),
     );

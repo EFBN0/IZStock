@@ -51,14 +51,15 @@ class _LoginState extends State<Login> {
       key: _form,
       child: Column(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           TextFormField(
             onTapOutside: (event) {
               _unfocus();
             },
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               labelText: 'Email',
-              filled: false,
+              prefixIcon: Icon(Icons.mail_outline_rounded),
             ),
             keyboardType: TextInputType.emailAddress,
             autocorrect: false,
@@ -75,14 +76,14 @@ class _LoginState extends State<Login> {
               _enteredEmail = value!;
             },
           ),
-          const SizedBox(height: 14,),
+          const SizedBox(height: 12),
           TextFormField(
             onTapOutside: (event) {
               _unfocus();
             },
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               labelText: 'Senha',
-              filled: false,
+              prefixIcon: Icon(Icons.lock_outline_rounded),
             ),
             obscureText: true,
             validator: (value) {
@@ -96,14 +97,8 @@ class _LoginState extends State<Login> {
             },
           ),
           const SizedBox(height: 20),
-          ElevatedButton(
+          FilledButton(
             onPressed: _submit,
-            style: ElevatedButton.styleFrom(
-              padding: EdgeInsets.symmetric(horizontal: 30, vertical: 12),
-              backgroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
-              foregroundColor: Theme.of(context).colorScheme.primaryContainer,
-              textStyle: TextStyle(fontSize: 24),
-            ),
             child: Text('Entrar'),
           ),
         ],

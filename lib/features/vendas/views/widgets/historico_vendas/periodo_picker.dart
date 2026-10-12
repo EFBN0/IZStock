@@ -97,73 +97,55 @@ class _PeriodoPickerState extends State<PeriodoPicker> {
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(
         children: [
           _buildChip('Hoje', PeriodoFiltro.hoje),
           const SizedBox(width: 8),
           _buildChip('Ontem', PeriodoFiltro.ontem),
           const SizedBox(width: 8),
-          _buildChip('7 Dias', PeriodoFiltro.semana),
+          _buildChip('7 dias', PeriodoFiltro.semana),
           const SizedBox(width: 8),
-          _buildChip('Este Mês', PeriodoFiltro.mes),
+          _buildChip('Este mês', PeriodoFiltro.mes),
           const SizedBox(width: 8),
-          _buildCustomChip(),
+          _buildChip(
+            _selectedFilter == PeriodoFiltro.personalizado && _customRange != null
+                ? '${_customRange!.start.day}/${_customRange!.start.month} – ${_customRange!.end.day}/${_customRange!.end.month}'
+                : 'Período',
+            PeriodoFiltro.personalizado,
+            icon: Icons.calendar_today_rounded,
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildChip(String label, PeriodoFiltro filtro) {
+  Widget _buildChip(String label, PeriodoFiltro filtro, {IconData? icon}) {
     final bool isSelected = _selectedFilter == filtro;
+    final colorScheme = Theme.of(context).colorScheme;
+
     return ChoiceChip(
       label: Text(label),
+      avatar: icon == null
+          ? null
+          : Icon(
+              icon,
+              size: 16,
+              color: isSelected ? colorScheme.onPrimary : colorScheme.onSurfaceVariant,
+            ),
       selected: isSelected,
-      onSelected: (bool selected) {
-        if (selected) _applyFilter(filtro);
+      onSelected: (_) {
+        if (!isSelected || filtro == PeriodoFiltro.personalizado) {
+          _applyFilter(filtro);
+        }
       },
-      selectedColor: Theme.of(context).colorScheme.primary,
-      labelStyle: TextStyle(
-        color: isSelected ? Colors.white : Colors.black87,
-        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-      ),
-      elevation: 2.0,
-      shadowColor: Colors.black.withValues(alpha: 0.5),
-      backgroundColor: Theme.of(context).colorScheme.onPrimary,
-      side: BorderSide.none,
-      checkmarkColor: Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-    );
-  }
-
-  Widget _buildCustomChip() {
-    final bool isSelected = _selectedFilter == PeriodoFiltro.personalizado;
-    return ActionChip(
-      avatar: Icon(
-        Icons.calendar_today,
-        size: 16,
-        color: isSelected
-            ? Colors.white
-            : Theme.of(context).colorScheme.primary,
-      ),
-      label: Text(
-        isSelected && _customRange != null
-            ? '${_customRange!.start.day}/${_customRange!.start.month} - ${_customRange!.end.day}/${_customRange!.end.month}'
-            : 'Outro período',
-      ),
-      backgroundColor: isSelected
-          ? Theme.of(context).colorScheme.primary
-          : Colors.white,
       side: BorderSide(
-        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.5),
+        color: isSelected ? colorScheme.primary : colorScheme.outlineVariant,
       ),
       labelStyle: TextStyle(
-        color: isSelected
-            ? Colors.white
-            : Theme.of(context).colorScheme.primary,
-        fontWeight: FontWeight.bold,
+        color: isSelected ? colorScheme.onPrimary : colorScheme.onSurface,
+        fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
       ),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      onPressed: () => _applyFilter(PeriodoFiltro.personalizado),
     );
   }
 }

@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:izstock/core/styles/theme.dart';
 import 'package:izstock/features/commons/services/formatter_service.dart';
 import 'package:izstock/features/vendas/controllers/carrinho/carrinho_controller.dart';
 import 'package:flutter/services.dart';
 
 class ResumoCarrinho extends ConsumerWidget {
-  const ResumoCarrinho({super.key});
+  const ResumoCarrinho({super.key, required this.onFinalizar});
+
+  final VoidCallback onFinalizar;
 
   void _addDesconto(BuildContext context, WidgetRef ref) {
     final estadoAtual = ref.read(carrinhoControllerProvider).value;
@@ -26,17 +29,23 @@ class ResumoCarrinho extends ConsumerWidget {
             FilteringTextInputFormatter.allow(RegExp(r'[0-9,]')),
           ],
           decoration: const InputDecoration(
-            hintText: 'Ex.: 15,00',
+            labelText: 'Valor do desconto',
+            hintText: '0,00',
             prefixText: 'R\$ ',
           ),
           autofocus: true,
         ),
+        actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
+            style: TextButton.styleFrom(
+              foregroundColor: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
             child: const Text('Cancelar'),
           ),
-          ElevatedButton(
+          FilledButton(
+            style: FilledButton.styleFrom(minimumSize: const Size(96, 44)),
             onPressed: () {
               final sanitizedText = textController.text.replaceAll(',', '.');
               final desconto = double.tryParse(sanitizedText) ?? 0.0;
@@ -45,7 +54,7 @@ class ResumoCarrinho extends ConsumerWidget {
                   .addDesconto(desconto);
               Navigator.of(context).pop();
             },
-            child: const Text('Salvar'),
+            child: const Text('Aplicar'),
           ),
         ],
       ),
@@ -63,161 +72,101 @@ class ResumoCarrinho extends ConsumerWidget {
     final subtotal = ref.read(carrinhoControllerProvider.notifier).subtotal;
     final double valorTotal = ref.read(carrinhoControllerProvider.notifier).valorTotal;
 
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final secondaryStyle = textTheme.bodyMedium!.copyWith(
+      color: colorScheme.onSurfaceVariant,
+    );
+
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            offset: const Offset(0, -4),
-            blurRadius: 10,
-          ),
-        ],
+        color: colorScheme.surface,
+        border: Border(top: BorderSide(color: colorScheme.outlineVariant)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (!hasDesconto)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Total',
-                  style: TextStyle(color: Colors.grey, fontSize: 16),
-                ),
-                Text(
-                  FormatterService.formatAsCurrency(subtotal),
-                  style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
           if (hasDesconto) ...[
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Subtotal',
-                  style: TextStyle(color: Colors.grey, fontSize: 14),
-                ),
+                Text('Subtotal', style: secondaryStyle),
                 Text(
                   FormatterService.formatAsCurrency(subtotal),
-                  style: const TextStyle(
-                    fontSize: 16, 
-                    color: Colors.grey, 
-                    decoration: TextDecoration.lineThrough,
-                  ),
+                  style: secondaryStyle,
                 ),
               ],
             ),
-            const SizedBox(height: 4),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Desconto',
-                  style: TextStyle(color: Colors.redAccent, fontSize: 14),
+                Text('Desconto', style: secondaryStyle),
+                const SizedBox(width: 4),
+                IconButton(
+                  onPressed: () => _addDesconto(context, ref),
+                  icon: const Icon(Icons.edit_outlined, size: 16),
+                  tooltip: 'Editar desconto',
+                  visualDensity: VisualDensity.compact,
+                  color: colorScheme.onSurfaceVariant,
                 ),
+                IconButton(
+                  onPressed: () => ref
+                      .read(carrinhoControllerProvider.notifier)
+                      .addDesconto(0.0),
+                  icon: const Icon(Icons.close_rounded, size: 16),
+                  tooltip: 'Remover desconto',
+                  visualDensity: VisualDensity.compact,
+                  color: colorScheme.onSurfaceVariant,
+                ),
+                const Spacer(),
                 Text(
                   '- ${FormatterService.formatAsCurrency(desconto)}',
-                  style: const TextStyle(
-                    fontSize: 16, 
-                    fontWeight: FontWeight.bold, 
-                    color: Colors.redAccent,
+                  style: textTheme.bodyMedium!.copyWith(
+                    color: AppColors.success,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ],
             ),
-            
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 8.0),
-              child: Divider(height: 1),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Total',
-                  style: TextStyle(
-                    color: Colors.black87, 
-                    fontSize: 16, 
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Text(
-                  FormatterService.formatAsCurrency(valorTotal),
-                  style: TextStyle(
-                    fontSize: 28, 
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                ),
-              ],
-            ),
-          ],
-
-          const SizedBox(height: 16),
-
-           if (hasDesconto)
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () {
-                      ref.read(carrinhoControllerProvider.notifier).addDesconto(0.0);
-                    },
-                    icon: const Icon(Icons.delete_outline, size: 18),
-                    label: const Text('Remover desconto'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.redAccent,
-                      side: const BorderSide(color: Colors.redAccent),
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: () => _addDesconto(context, ref),
-                    icon: const Icon(Icons.edit, size: 18),
-                    label: const Text('Editar'),
-                    style: ElevatedButton.styleFrom(
-                      elevation: 0,
-                      backgroundColor: Colors.grey[200],
-                      foregroundColor: Colors.black87,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            )
-          else
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
+          ] else
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
                 onPressed: () => _addDesconto(context, ref),
-                style: ElevatedButton.styleFrom(
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                ),
-                child: const Text(
-                  'Aplicar desconto',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
+                icon: const Icon(Icons.local_offer_outlined, size: 18),
+                label: const Text('Adicionar desconto'),
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
                 ),
               ),
             ),
+          const SizedBox(height: 4),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Total',
+                style: textTheme.titleMedium!.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              Text(
+                FormatterService.formatAsCurrency(valorTotal),
+                style: textTheme.headlineSmall!.copyWith(
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: -0.5,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton(
+              onPressed: onFinalizar,
+              child: const Text('Finalizar venda'),
+            ),
+          ),
         ],
       ),
     );

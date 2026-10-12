@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:izstock/features/commons/services/formatter_service.dart';
+import 'package:izstock/features/commons/widgets/empty_state.dart';
 import 'package:izstock/features/estoque/models/mercadoria.dart';
 import 'package:izstock/features/vendas/controllers/carrinho/carrinho_controller.dart';
 import 'package:izstock/features/vendas/controllers/carrinho/mercadoria_list_controller.dart';
@@ -14,32 +15,45 @@ class MercadoriaList extends ConsumerWidget {
 
     return mercadoriasAgrupadasAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (err, stack) => Center(child: Text('Erro: $err')),
+      error: (err, stack) => EmptyState(
+        icon: Icons.error_outline_rounded,
+        title: 'Não foi possível carregar',
+        message: '$err',
+      ),
       data: (estoqueMercadoriaListMap) {
         if (estoqueMercadoriaListMap.isEmpty) {
-          return const Center(child: Text('Nenhum produto encontrado.'));
+          return const EmptyState(
+            icon: Icons.search_off_rounded,
+            title: 'Nenhum produto disponível',
+            message: 'Só aparecem aqui mercadorias com estoque.',
+          );
         }
 
         final estoques = estoqueMercadoriaListMap.keys.toList();
         estoques.sort();
 
         return ListView.builder(
-          padding: const EdgeInsets.only(bottom: 80),
+          padding: const EdgeInsets.fromLTRB(16, 4, 16, 32),
           itemCount: estoques.length,
           itemBuilder: (ctx, index) {
             final estoque = estoques[index];
             final mercadorias = estoqueMercadoriaListMap[estoque]!;
 
             return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _buildHeaderEstoque(estoque, mercadorias.length),
-
-                ...mercadorias.map(
-                  (mercadoria) => _buildItemMercadoria(mercadoria, context, ref),
+                _buildHeaderEstoque(context, estoque),
+                Card(
+                  child: Column(
+                    children: [
+                      for (var i = 0; i < mercadorias.length; i++) ...[
+                        if (i > 0) const Divider(indent: 16, endIndent: 16),
+                        _buildItemMercadoria(mercadorias[i], context, ref),
+                      ],
+                    ],
+                  ),
                 ),
-
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
               ],
             );
           },
@@ -48,53 +62,43 @@ class MercadoriaList extends ConsumerWidget {
     );
   }
 
-  Widget _buildHeaderEstoque(String titulo, int qtd) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      color: Colors.grey[200],
-      child: Row(
-        children: [
-          Icon(Icons.inventory_2_outlined, size: 18, color: Colors.grey[700]),
-          const SizedBox(width: 8),
-          Text(
-            titulo.toUpperCase(),
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: Colors.grey[800],
-              fontSize: 13,
-              letterSpacing: 1.0,
-            ),
-          ),
-          const Spacer(),
-          Text(
-            '$qtd itens',
-            style: TextStyle(color: Colors.grey[600], fontSize: 12),
-          ),
-        ],
+  Widget _buildHeaderEstoque(BuildContext context, String titulo) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(4, 12, 4, 8),
+      child: Text(
+        titulo.toUpperCase(),
+        style: Theme.of(context).textTheme.labelSmall!.copyWith(
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.8,
+        ),
       ),
     );
   }
 
-  Widget _buildItemMercadoria(Mercadoria mercadoria, BuildContext context, WidgetRef ref) {
+  Widget _buildItemMercadoria(
+    Mercadoria mercadoria,
+    BuildContext context,
+    WidgetRef ref,
+  ) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return ListTile(
-      title: Text(mercadoria.titulo),
-      subtitle: Text(FormatterService.formatAsCurrency(mercadoria.valorVenda)),
-      leading: Container(
-        width: 40,
-        height: 40,
-        decoration: BoxDecoration(
-          color: Colors.deepPurple.shade50,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: const Icon(
-          Icons.shopping_bag_outlined,
-          color: Colors.deepPurple,
-        ),
+      contentPadding: const EdgeInsets.fromLTRB(16, 2, 8, 2),
+      title: Text(
+        mercadoria.titulo,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: const TextStyle(fontWeight: FontWeight.w600),
       ),
+      subtitle: Text(
+        '${FormatterService.formatAsCurrency(mercadoria.valorVenda)}  ·  ${mercadoria.quantidade} disponíveis',
+        style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 13),
+      ),
+      trailing: Icon(Icons.add_circle_outline_rounded, color: colorScheme.primary),
       onTap: () {
         ref
-            .watch(carrinhoControllerProvider.notifier)
+            .read(carrinhoControllerProvider.notifier)
             .addMercadoriaToCarrinho(mercadoria);
         Navigator.of(context).pop();
       },

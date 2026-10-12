@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:izstock/core/styles/theme.dart';
+import 'package:izstock/features/commons/widgets/empty_state.dart';
 import 'package:izstock/features/vendas/controllers/carrinho/carrinho_controller.dart';
 import 'package:izstock/features/vendas/controllers/carrinho/carrinho_state.dart';
 import 'package:izstock/features/vendas/controllers/carrinho/search_mercadoria_controller.dart';
@@ -19,28 +21,57 @@ class CarrinhoPage extends ConsumerStatefulWidget {
 
 class _CarrinhoPageState extends ConsumerState<CarrinhoPage> {
   Future<MeioPagamento?> _solicitarMeioPagamento(BuildContext context) async {
-    return await showDialog<MeioPagamento>(
+    return await showModalBottomSheet<MeioPagamento>(
       context: context,
       builder: (context) {
-        return SimpleDialog(
-          title: const Text('Forma de Pagamento'),
-          children: MeioPagamento.values.map((meio) {
-            return SimpleDialogOption(
-              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
-              onPressed: () {
-                Navigator.pop(context, meio);
-              },
-              child: Row(
-                children: [
-                  Icon(meio.icon, color: meio.color),
-                  const SizedBox(width: 16),
-                  Text(meio.label, style: const TextStyle(fontSize: 16)),
-                ],
-              ),
-            );
-          }).toList(),
+        final textTheme = Theme.of(context).textTheme;
+
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  'Forma de pagamento',
+                  style: textTheme.titleLarge!.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                for (final meio in MeioPagamento.values)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Card(
+                      child: ListTile(
+                        onTap: () => Navigator.pop(context, meio),
+                        leading: CircleAvatar(
+                          radius: 18,
+                          backgroundColor: meio.color.withValues(alpha: 0.12),
+                          child: Icon(meio.icon, color: meio.color, size: 20),
+                        ),
+                        title: Text(
+                          meio.label,
+                          style: const TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                        trailing: const Icon(Icons.chevron_right_rounded),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
         );
       },
+    );
+  }
+
+  void _abrirBusca(BuildContext context) {
+    ref.read(termoBuscaProvider.notifier).state = '';
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (ctx) => const SearchMercadoriaPage()),
     );
   }
 
@@ -49,7 +80,7 @@ class _CarrinhoPageState extends ConsumerState<CarrinhoPage> {
     if (meioPagamento == null) return;
 
     ref
-        .watch(carrinhoControllerProvider.notifier)
+        .read(carrinhoControllerProvider.notifier)
         .finalizarVenda(meioPagamento: meioPagamento);
   }
 
@@ -60,7 +91,7 @@ class _CarrinhoPageState extends ConsumerState<CarrinhoPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Erro: ${next.error}'),
-            backgroundColor: Colors.red,
+            backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
         return;
@@ -73,30 +104,14 @@ class _CarrinhoPageState extends ConsumerState<CarrinhoPage> {
           case CarrinhoStatus.vendaFinalizada:
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
-                content: Text('Venda realizada com sucesso!'),
-                backgroundColor: Colors.green,
+                content: Text('Venda registrada com sucesso'),
+                backgroundColor: AppColors.success,
               ),
             );
             break;
 
           case CarrinhoStatus.itemRemovido:
-            ScaffoldMessenger.of(context).clearSnackBars();
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Item removido'),
-                duration: Duration(seconds: 1),
-              ),
-            );
-            break;
-
           case CarrinhoStatus.itemAdicionado:
-            ScaffoldMessenger.of(context).clearSnackBars();
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Item adicionado'),
-                duration: Duration(seconds: 1),
-              ),
-            );
             break;
 
           case CarrinhoStatus.erro:
@@ -104,7 +119,7 @@ class _CarrinhoPageState extends ConsumerState<CarrinhoPage> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.mensagemErro!),
-                duration: Duration(seconds: 1),
+                duration: const Duration(seconds: 2),
                 backgroundColor: Theme.of(context).colorScheme.error,
               ),
             );
@@ -117,99 +132,62 @@ class _CarrinhoPageState extends ConsumerState<CarrinhoPage> {
     });
 
     final carrinhoAsync = ref.watch(carrinhoControllerProvider);
+    final carrinho = carrinhoAsync.value;
+    final temItens = carrinho?.mercadoriaList.isNotEmpty ?? false;
+
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Nova venda'),
+        actions: [
+          if (temItens)
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: TextButton.icon(
+                onPressed: () => _abrirBusca(context),
+                icon: const Icon(Icons.add_rounded),
+                label: const Text('Produto'),
+              ),
+            ),
+        ],
+      ),
       body: carrinhoAsync.when(
-        error: (err, stack) => Center(
-          child: Text(
-            'Erro: $err',
-            style: TextStyle(color: Theme.of(context).colorScheme.error),
-          ),
+        error: (err, stack) => EmptyState(
+          icon: Icons.error_outline_rounded,
+          title: 'Algo deu errado',
+          message: '$err',
         ),
         loading: () => const Center(child: CircularProgressIndicator()),
         data: (carrinho) {
-          Widget mainContent = Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Icon(Icons.shopping_basket, size: 120),
-              const SizedBox(height: 24),
-              Text(
-                'Sua cestinha está vazia',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          if (carrinho.mercadoriaList.isEmpty) {
+            return EmptyState(
+              icon: Icons.shopping_bag_outlined,
+              title: 'Carrinho vazio',
+              message: 'Adicione produtos dos seus estoques para registrar uma venda.',
+              action: FilledButton.icon(
+                onPressed: () => _abrirBusca(context),
+                icon: const Icon(Icons.search_rounded),
+                label: const Text('Buscar produto'),
+                style: FilledButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                ),
               ),
-              const SizedBox(height: 12),
-              Text(
-                'Escaneie o QR Code do produto para adicioná-lo a cestinha',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 14, height: 1.4),
-              ),
-            ],
-          );
-
-          if (carrinho.mercadoriaList.isNotEmpty) {
-            mainContent = ListView.builder(
-              padding: EdgeInsets.zero,
-              itemCount: carrinho.mercadoriaList.length,
-              itemBuilder: (context, index) {
-                final mercadoria = carrinho.mercadoriaList[index];
-                return CardMercadoriaCarrinho(mercadoria: mercadoria);
-              },
             );
           }
 
           return Column(
             children: [
-              Container(
-                padding: const EdgeInsets.fromLTRB(20, 50, 20, 20),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.05),
-                      offset: const Offset(0, 6),
-                      blurRadius: 10,
-                    ),
-                  ],
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    OutlinedButton.icon(
-                      onPressed: () {
-                        ref.read(termoBuscaProvider.notifier).state = '';
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (ctx) => SearchMercadoriaPage(),
-                          ),
-                        );
-                      },
-                      label: Text('Buscar'),
-                      icon: Icon(Icons.search),
-                    ),
-                    TextButton(
-                      onPressed: carrinho.mercadoriaList.isNotEmpty
-                          ? () => _finalizarCompra(context)
-                          : null,
-                      child: Text('Finalizar compra'),
-                    ),
-                  ],
-                ),
-              ),
-
               Expanded(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 20,
-                  ),
-                  width: double.infinity,
-                  child: mainContent,
+                child: ListView.separated(
+                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+                  itemCount: carrinho.mercadoriaList.length,
+                  separatorBuilder: (_, _) => const SizedBox(height: 8),
+                  itemBuilder: (context, index) {
+                    final mercadoria = carrinho.mercadoriaList[index];
+                    return CardMercadoriaCarrinho(mercadoria: mercadoria);
+                  },
                 ),
               ),
-
-              ResumoCarrinho(),
+              ResumoCarrinho(onFinalizar: () => _finalizarCompra(context)),
             ],
           );
         },

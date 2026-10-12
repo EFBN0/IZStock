@@ -16,13 +16,11 @@ class SearchMercadoriaPage extends ConsumerStatefulWidget {
 }
 
 class _SearchMercadoriaPageState extends ConsumerState<SearchMercadoriaPage> {
-  final _searchController = TextEditingController();
   Timer? _debounce;
 
   @override
   void dispose() {
     _debounce?.cancel();
-    _searchController.dispose();
     super.dispose();
   }
 
@@ -38,54 +36,22 @@ class _SearchMercadoriaPageState extends ConsumerState<SearchMercadoriaPage> {
 
   @override
   Widget build(BuildContext context) {
-    return PopScope(
-      canPop: true,
-      onPopInvokedWithResult: (didPop, result) {},
-      child: Scaffold(
-        appBar: AppBar(
-          automaticallyImplyLeading: false,
-          backgroundColor: Colors.white,
-          bottom: PreferredSize(
-            preferredSize: const Size.fromHeight(36),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Expanded(
-                        child: SearchInput(
-                          placeholder: 'Buscar mercadorias',
-                          onInputTextChanged: (context, q, controller) => {
-                            _onSearchChanged(q),
-                          },
-                          focusNode: FocusNode(),
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      TextButton(
-                        onPressed: () {
-                          FocusScope.of(context).unfocus();
-                          Navigator.of(context).pop();
-                        },
-                        style: TextButton.styleFrom(
-                          textStyle: Theme.of(
-                            context,
-                          ).textTheme.bodyMedium!.copyWith(fontSize: 12),
-                        ),
-                        child: const Text('Cancelar'),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                ],
-              ),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Adicionar produto'),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(64),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+            child: SearchInput(
+              placeholder: 'Buscar em todos os estoques',
+              autofocus: true,
+              onChanged: _onSearchChanged,
             ),
           ),
         ),
-        body: MercadoriaList(),
       ),
+      body: const MercadoriaList(),
     );
   }
 }

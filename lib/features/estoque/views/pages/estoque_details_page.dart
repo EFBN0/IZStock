@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:izstock/features/commons/widgets/confirm_dialog.dart';
+import 'package:izstock/features/commons/widgets/empty_state.dart';
+import 'package:izstock/features/commons/widgets/search_input.dart';
 import 'package:izstock/features/estoque/controllers/mercadoria_controller.dart';
 import 'package:izstock/features/estoque/models/estoque.dart';
 import 'package:izstock/features/estoque/models/mercadoria.dart';
@@ -18,13 +21,12 @@ class EstoqueDetailsPage extends ConsumerStatefulWidget {
 }
 
 class _EstoqueDetailsPageState extends ConsumerState<EstoqueDetailsPage> {
-  final TextEditingController _searchController = TextEditingController();
   Timer? _debounce;
+  bool _hasSearch = false;
 
   @override
   void dispose() {
     _debounce?.cancel();
-    _searchController.dispose();
     super.dispose();
   }
 
@@ -36,22 +38,35 @@ class _EstoqueDetailsPageState extends ConsumerState<EstoqueDetailsPage> {
     _debounce = Timer(const Duration(milliseconds: 300), () {
       ref.read(searchQueryProvider.notifier).state = query;
     });
-    setState(() {});
+    setState(() {
+      _hasSearch = query.isNotEmpty;
+    });
   }
 
   void _touchMercadoria(BuildContext context, Mercadoria? mercadoria) {
     showModalBottomSheet(
       isScrollControlled: true,
+      useSafeArea: true,
       context: context,
       builder: (ctx) =>
           FormMercadoria(mercadoria: mercadoria, estoque: widget.estoque),
     );
   }
 
-  void _removeMercadoria(WidgetRef ref, Mercadoria mercadoria) {
-    ref
-        .read(mercadoriaControllerProvider.notifier)
-        .removeMercadoria(widget.estoque.id!, mercadoria);
+  Future<void> _removeMercadoria(Mercadoria mercadoria) async {
+    final confirmed = await showConfirmDialog(
+      context,
+      title: 'Excluir mercadoria?',
+      message: '"${mercadoria.titulo}" será removida deste estoque.',
+      confirmLabel: 'Excluir',
+      destructive: true,
+    );
+
+    if (confirmed) {
+      ref
+          .read(mercadoriaControllerProvider.notifier)
+          .removeMercadoria(widget.estoque.id!, mercadoria);
+    }
   }
 
   @override
@@ -61,12 +76,10 @@ class _EstoqueDetailsPageState extends ConsumerState<EstoqueDetailsPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Estoque: ${widget.estoque.titulo}'),
-        elevation: 5.0,
-        shadowColor: const Color.fromARGB(255, 0, 0, 0).withValues(alpha: 0.5),
+        title: Text(widget.estoque.titulo),
         actions: [
           PopupMenuButton<OrdenacaoMercadoria>(
-            icon: const Icon(Icons.sort),
+            icon: const Icon(Icons.swap_vert_rounded),
             tooltip: 'Ordenar',
             initialValue: ordenacao,
             onSelected: (value) {
@@ -81,87 +94,59 @@ class _EstoqueDetailsPageState extends ConsumerState<EstoqueDetailsPage> {
                 ),
             ],
           ),
+          const SizedBox(width: 4),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          _touchMercadoria(context, null);
-        },
-        child: const Icon(Icons.add),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => _touchMercadoria(context, null),
+        icon: const Icon(Icons.add_rounded),
+        label: const Text('Nova mercadoria'),
       ),
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: TextField(
-              controller: _searchController,
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+            child: SearchInput(
+              placeholder: 'Buscar mercadoria',
               onChanged: _onSearchChanged,
-              decoration: InputDecoration(
-                hintText: 'Buscar mercadoria...',
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                suffixIcon: _searchController.text.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.clear),
-                        onPressed: () {
-                          _searchController.clear();
-                          _onSearchChanged('');
-                        },
-                      )
-                    : null,
-              ),
             ),
           ),
-
           Expanded(
             child: mercadoriaAsyncList.when(
               loading: () => const Center(child: CircularProgressIndicator()),
               data: (mercadorias) {
                 if (mercadorias.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.inventory, size: 64, color: Colors.grey[400]),
-                        const SizedBox(height: 16),
-                        Text(
-                          _searchController.text.isEmpty 
-                            ? 'Nenhuma mercadoria adicionada.'
-                            : 'Nenhum resultado encontrado.',
-                          style: TextStyle(color: Colors.grey[600], fontSize: 18),
-                        ),
-                      ],
-                    ),
-                  );
+                  return _hasSearch
+                      ? const EmptyState(
+                          icon: Icons.search_off_rounded,
+                          title: 'Nada encontrado',
+                          message: 'Tente buscar por outro nome.',
+                        )
+                      : const EmptyState(
+                          icon: Icons.sell_outlined,
+                          title: 'Nenhuma mercadoria',
+                          message: 'Adicione a primeira mercadoria deste estoque.',
+                        );
                 }
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
-                  child: ListView.builder(
-                    itemCount: mercadorias.length,
-                    itemBuilder: (ctx, index) => Container(
-                      margin: const EdgeInsets.symmetric(vertical: 6),
-                      child: GestureDetector(
-                        onTap: () {
-                          _touchMercadoria(context, mercadorias[index]);
-                        },
-                        child: MercadoriaCard(
-                          mercadoria: mercadorias[index],
-                          onRemoveMercadoria: (mercadoria) {
-                            _removeMercadoria(ref, mercadoria);
-                          },
-                        ),
-                      ),
-                    ),
-                  ),
+
+                return ListView.separated(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 96),
+                  itemCount: mercadorias.length,
+                  separatorBuilder: (_, _) => const SizedBox(height: 8),
+                  itemBuilder: (ctx, index) {
+                    final mercadoria = mercadorias[index];
+                    return MercadoriaCard(
+                      mercadoria: mercadoria,
+                      onTap: () => _touchMercadoria(context, mercadoria),
+                      onRemoveMercadoria: _removeMercadoria,
+                    );
+                  },
                 );
               },
-              error: (err, stack) => Center(
-                child: Text(
-                  'Erro: $err',
-                  style: TextStyle(color: Theme.of(context).colorScheme.error),
-                ),
+              error: (err, stack) => EmptyState(
+                icon: Icons.error_outline_rounded,
+                title: 'Não foi possível carregar',
+                message: '$err',
               ),
             ),
           ),

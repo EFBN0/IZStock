@@ -10,24 +10,19 @@ class HistoricoVendasPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      appBar: AppBar(
-        elevation: 5.0,
-        shadowColor: const Color.fromARGB(255, 0, 0, 0).withValues(alpha: 0.5),
-        title: Text('Histórico de vendas'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-        child: Column(
-          children: [
-            PeriodoPicker(
+      appBar: AppBar(title: const Text('Histórico')),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 4, bottom: 12),
+            child: PeriodoPicker(
               onPeriodoChanged: (range) {
                 ref.read(dateTimeRangeProvider.notifier).state = range;
               },
             ),
-            const SizedBox(height: 16),
-            VendasPanel(),
-          ],
-        ),
+          ),
+          const Expanded(child: VendasPanel()),
+        ],
       ),
     );
   }

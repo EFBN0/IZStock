@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:izstock/core/styles/theme.dart';
+import 'package:izstock/features/commons/widgets/empty_state.dart';
 import 'package:izstock/features/dashboard/models/combo_regra.dart';
 import '../controllers/dashboard_controller.dart';
 
@@ -23,12 +25,13 @@ class TabCombos extends ConsumerWidget {
           return b.confianca.compareTo(a.confianca);
         });
 
-        return ListView.builder(
-          padding: const EdgeInsets.all(16),
+        return ListView.separated(
+          padding: const EdgeInsets.fromLTRB(16, 20, 16, 32),
           itemCount: regrasOrdenadas.length,
+          separatorBuilder: (_, _) => const SizedBox(height: 10),
           itemBuilder: (context, index) {
             final regra = regrasOrdenadas[index];
-            return _buildComboCard(regra);
+            return _buildComboCard(context, regra);
           },
         );
       },
@@ -36,124 +39,85 @@ class TabCombos extends ConsumerWidget {
   }
 
   Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.lightbulb_outline, size: 64, color: Colors.grey[300]),
-          const SizedBox(height: 16),
-          Text(
-            'Ainda não temos dados suficientes.',
-            style: TextStyle(fontSize: 18, color: Colors.grey[600], fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 40),
-            child: Text(
-              'Continue registrando vendas. O sistema aprenderá os padrões de compra dos seus clientes em breve.',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.grey),
-            ),
-          ),
-        ],
-      ),
+    return const EmptyState(
+      icon: Icons.lightbulb_outline_rounded,
+      title: 'Ainda sem dicas',
+      message:
+          'Continue registrando vendas. Assim que houver dados suficientes, sugerimos combinações de produtos que vendem juntos.',
     );
   }
 
-  Widget _buildComboCard(ComboRegra regra) {
-    final gatilho = regra.gatilho;
-    final sugestao = regra.sugestao;
+  Widget _buildComboCard(BuildContext context, ComboRegra regra) {
+    final textTheme = Theme.of(context).textTheme;
     final confianca = (regra.confianca * 100).toInt();
-    final lift = regra.lift;
-
-    final isStrong = lift > 1.5; 
-    final cardColor = isStrong ? Colors.green.shade50 : Colors.blue.shade50;
-    final iconColor = isStrong ? Colors.green : Colors.blue;
+    final isStrong = regra.lift > 1.5;
+    final destaque = isStrong ? AppColors.success : Theme.of(context).colorScheme.primary;
+    final labelStyle = textTheme.bodySmall!.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant);
+    final produtoStyle = textTheme.titleSmall!.copyWith(fontWeight: FontWeight.w600, fontSize: 15);
 
     return Card(
-      elevation: 2,
-      margin: const EdgeInsets.only(bottom: 16),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: cardColor, width: 2),
-        ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                color: cardColor,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.auto_graph, size: 18, color: iconColor),
-                  const SizedBox(width: 8),
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: destaque.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(AppRadius.lg),
+                  ),
+                  child: Text(
+                    '$confianca% de chance',
+                    style: textTheme.labelSmall!.copyWith(
+                      color: destaque,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                if (isStrong) ...[
+                  const SizedBox(width: 6),
+                  Icon(Icons.bolt_rounded, size: 16, color: destaque),
                   Text(
-                    'Chance de venda: $confianca%',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: iconColor,
+                    'Combo forte',
+                    style: textTheme.labelSmall!.copyWith(
+                      color: destaque,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
-                  const Spacer(),
-                  if (isStrong)
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: Colors.green,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: const Text(
-                        'SUPER COMBO',
-                        style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
-                      ),
-                    )
                 ],
-              ),
+              ],
             ),
-
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text('Se o cliente levar...', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                        const SizedBox(height: 4),
-                        Text(
-                          gatilho,
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                        ),
-                      ],
-                    ),
+            const SizedBox(height: 14),
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Quem leva', style: labelStyle),
+                      const SizedBox(height: 2),
+                      Text(regra.gatilho, style: produtoStyle),
+                    ],
                   ),
-
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    child: Icon(Icons.arrow_forward, color: Colors.grey[400]),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  child: Icon(Icons.arrow_forward_rounded, size: 18, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                ),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text('Ofereça também', style: labelStyle),
+                      const SizedBox(height: 2),
+                      Text(regra.sugestao, textAlign: TextAlign.end, style: produtoStyle),
+                    ],
                   ),
-
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text('Ofereça também!', style: TextStyle(fontSize: 12, color: iconColor, fontWeight: FontWeight.bold)),
-                        const SizedBox(height: 4),
-                        Text(
-                          sugestao,
-                          textAlign: TextAlign.end,
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           ],
         ),

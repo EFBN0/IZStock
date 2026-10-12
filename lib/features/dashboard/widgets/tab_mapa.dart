@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:izstock/core/styles/theme.dart';
 import '../controllers/dashboard_controller.dart';
 
 class TabMapa extends ConsumerStatefulWidget {
@@ -45,8 +46,8 @@ class _TabMapaState extends ConsumerState<TabMapa> {
                   circles: hotspots.map((h) {
                     return CircleMarker(
                       point: LatLng(h.latitude, h.longitude),
-                      color: Colors.redAccent.withValues(alpha: 0.3),
-                      borderColor: Colors.redAccent,
+                      color: AppColors.danger.withValues(alpha: 0.2),
+                      borderColor: AppColors.danger,
                       borderStrokeWidth: 2,
                       radius: h.raio,
                       useRadiusInMeter: true,
@@ -60,7 +61,7 @@ class _TabMapaState extends ConsumerState<TabMapa> {
                       point: LatLng(h.latitude, h.longitude),
                       width: 40,
                       height: 40,
-                      child: const Icon(Icons.location_on, color: Colors.red, size: 40),
+                      child: const Icon(Icons.location_on, color: AppColors.danger, size: 36),
                     );
                   }).toList(),
                 ),
@@ -71,28 +72,23 @@ class _TabMapaState extends ConsumerState<TabMapa> {
               top: 16,
               left: 16,
               right: 16,
-              child: Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.9),
-                  borderRadius: BorderRadius.circular(8),
-                  boxShadow: const [
-                    BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2))
-                  ],
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.whatshot, color: Colors.redAccent),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        hotspots.isEmpty 
-                          ? 'Nenhum ponto identificado.'
-                          : 'Áreas vermelhas são seus hotspots de vendas.',
-                        style: const TextStyle(fontSize: 12, color: Colors.black87),
+              child: Card(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.local_fire_department_outlined, color: AppColors.danger, size: 20),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          hotspots.isEmpty
+                              ? 'Ainda não há pontos de venda identificados.'
+                              : 'As áreas destacadas concentram suas vendas.',
+                          style: Theme.of(context).textTheme.bodySmall!.copyWith(fontSize: 13),
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
