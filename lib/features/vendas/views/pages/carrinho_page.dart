@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:izstock/core/styles/theme.dart';
+import 'package:izstock/features/commons/widgets/confirm_dialog.dart';
 import 'package:izstock/features/commons/widgets/empty_state.dart';
 import 'package:izstock/features/vendas/controllers/carrinho/carrinho_controller.dart';
 import 'package:izstock/features/vendas/controllers/carrinho/carrinho_state.dart';
@@ -67,6 +68,20 @@ class _CarrinhoPageState extends ConsumerState<CarrinhoPage> {
     );
   }
 
+  Future<void> _limparCarrinho(BuildContext context) async {
+    final confirmed = await showConfirmDialog(
+      context,
+      title: 'Limpar carrinho?',
+      message: 'Todos os itens e o desconto serão removidos desta venda.',
+      confirmLabel: 'Limpar',
+      destructive: true,
+    );
+
+    if (confirmed) {
+      ref.read(carrinhoControllerProvider.notifier).limparCarrinho();
+    }
+  }
+
   void _abrirBusca(BuildContext context) {
     ref.read(termoBuscaProvider.notifier).state = '';
     Navigator.push(
@@ -119,7 +134,7 @@ class _CarrinhoPageState extends ConsumerState<CarrinhoPage> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.mensagemErro!),
-                duration: const Duration(seconds: 2),
+                duration: const Duration(seconds: 4),
                 backgroundColor: Theme.of(context).colorScheme.error,
               ),
             );
@@ -139,15 +154,19 @@ class _CarrinhoPageState extends ConsumerState<CarrinhoPage> {
       appBar: AppBar(
         title: const Text('Nova venda'),
         actions: [
-          if (temItens)
-            Padding(
-              padding: const EdgeInsets.only(right: 8),
-              child: TextButton.icon(
-                onPressed: () => _abrirBusca(context),
-                icon: const Icon(Icons.add_rounded),
-                label: const Text('Produto'),
-              ),
+          if (temItens) ...[
+            TextButton.icon(
+              onPressed: () => _abrirBusca(context),
+              icon: const Icon(Icons.add_rounded),
+              label: const Text('Produto'),
             ),
+            IconButton(
+              onPressed: () => _limparCarrinho(context),
+              tooltip: 'Limpar carrinho',
+              icon: const Icon(Icons.remove_shopping_cart_outlined),
+            ),
+            const SizedBox(width: 4),
+          ],
         ],
       ),
       body: carrinhoAsync.when(

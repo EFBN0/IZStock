@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:izstock/core/styles/theme.dart';
 import 'package:izstock/features/commons/services/formatter_service.dart';
 import 'package:izstock/features/vendas/controllers/carrinho/carrinho_controller.dart';
+import 'package:izstock/features/vendas/controllers/carrinho/search_mercadoria_controller.dart';
 import 'package:izstock/features/vendas/models/mercadoria_venda.dart';
 
 class CardMercadoriaCarrinho extends ConsumerWidget {
@@ -16,15 +17,14 @@ class CardMercadoriaCarrinho extends ConsumerWidget {
     final textTheme = Theme.of(context).textTheme;
     final controller = ref.read(carrinhoControllerProvider.notifier);
 
-    final estoqueDisponivel = ref
-        .watch(carrinhoControllerProvider)
-        .value
-        ?.cacheMercadoriaList
-        .where((m) => m.id == mercadoria.mercadoriaId)
-        .firstOrNull
-        ?.quantidade;
+    ref.watch(mercadoriasProvider);
+    final estoqueDisponivel = controller.estoqueDisponivel(
+      mercadoria.mercadoriaId,
+    );
     final podeIncrementar =
         estoqueDisponivel == null || mercadoria.quantidade < estoqueDisponivel;
+    final excedeEstoque =
+        estoqueDisponivel != null && mercadoria.quantidade > estoqueDisponivel;
 
     return Card(
       child: Padding(
@@ -51,6 +51,18 @@ class CardMercadoriaCarrinho extends ConsumerWidget {
                       color: colorScheme.onSurfaceVariant,
                     ),
                   ),
+                  if (excedeEstoque) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      estoqueDisponivel <= 0
+                          ? 'Esgotado'
+                          : 'Só $estoqueDisponivel disponíveis',
+                      style: textTheme.bodySmall!.copyWith(
+                        color: colorScheme.error,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
                   const SizedBox(height: 6),
                   Text(
                     FormatterService.formatAsCurrency(mercadoria.valorTotal),

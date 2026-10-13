@@ -27,56 +27,89 @@ class VendaRepository extends BaseRepository {
   }
 
   Future<void> registrarVenda(Venda venda) async {
-    final batch = firestore.batch();
-    final vendaRef = firestore
-      .collection('users')
-      .doc(userId)
-      .collection('vendas')
-      .doc(venda.id);
-
-    batch.set(vendaRef, venda.copyWith(userId: userId).toFirestore());
-
-    for (final item in venda.itens) {
-      final mercadoriaRef = firestore
-          .collection('users')
-          .doc(userId)
-          .collection('estoques')
-          .doc(item.estoqueId)
-          .collection('mercadorias')
-          .doc(item.mercadoriaId);
-
-      final estoqueRef = firestore
-          .collection('users')
-          .doc(userId)
-          .collection('estoques')
-          .doc(item.estoqueId);
-
-      batch.update(mercadoriaRef, {
-        'quantidade': FieldValue.increment(-item.quantidade),
-      });
-
-      batch.update(estoqueRef, {
-        'quantidadeItens': FieldValue.increment(-item.quantidade),
-      });
-    }
+    final userRef = firestore.collection('users').doc(userId);
+    final vendaRef = userRef.collection('vendas').doc(venda.id);
 
     final String dateId =
         "${venda.data.year}-${venda.data.month.toString().padLeft(2, '0')}-${venda.data.day.toString().padLeft(2, '0')}";
+    final resumoRef = userRef.collection('resumos').doc(dateId);
 
-    final resumoRef = firestore
-        .collection('users')
-        .doc(userId)
-        .collection('resumos')
-        .doc(dateId);
+    await firestore.runTransaction((transaction) async {
+      final mercadoriaRefs = [
+        for (final item in venda.itens)
+          userRef
+              .collection('estoques')
+              .doc(item.estoqueId)
+              .collection('mercadorias')
+              .doc(item.mercadoriaId),
+      ];
 
-    batch.set(resumoRef, {
-      'data': dateId,
-      'faturamento': FieldValue.increment(venda.valorVendaTotal),
-      'lucro': FieldValue.increment(venda.lucroTotal),
-      'capitalGiro': FieldValue.increment(venda.valorVendaTotal - venda.lucroTotal),
-      'qtdVendas': FieldValue.increment(1),
-    }, SetOptions(merge: true));
+      final snapshots = [
+        for (final ref in mercadoriaRefs) await transaction.get(ref),
+      ];
 
-    await batch.commit();
+      for (var i = 0; i < venda.itens.length; i++) {
+        final item = venda.itens[i];
+        final disponivel =
+            (snapshots[i].data()?['quantidade'] as num?)?.toInt() ?? 0;
+
+        if (!snapshots[i].exists || disponivel < item.quantidade) {
+          throw EstoqueInsuficienteException(
+            titulo: item.titulo,
+            disponivel: disponivel,
+            solicitado: item.quantidade,
+          );
+        }
+      }
+
+      transaction.set(vendaRef, venda.copyWith(userId: userId).toFirestore());
+
+      final baixaPorEstoque = <String, int>{};
+
+      for (var i = 0; i < venda.itens.length; i++) {
+        final item = venda.itens[i];
+
+        transaction.update(mercadoriaRefs[i], {
+          'quantidade': FieldValue.increment(-item.quantidade),
+        });
+
+        baixaPorEstoque[item.estoqueId] =
+            (baixaPorEstoque[item.estoqueId] ?? 0) + item.quantidade;
+      }
+
+      baixaPorEstoque.forEach((estoqueId, quantidade) {
+        transaction.update(userRef.collection('estoques').doc(estoqueId), {
+          'quantidadeItens': FieldValue.increment(-quantidade),
+        });
+      });
+
+      transaction.set(resumoRef, {
+        'data': dateId,
+        'faturamento': FieldValue.increment(venda.valorVendaTotal),
+        'lucro': FieldValue.increment(venda.lucroTotal),
+        'capitalGiro': FieldValue.increment(venda.valorVendaTotal - venda.lucroTotal),
+        'qtdVendas': FieldValue.increment(1),
+      }, SetOptions(merge: true));
+    });
+  }
+}
+
+class EstoqueInsuficienteException implements Exception {
+  const EstoqueInsuficienteException({
+    required this.titulo,
+    required this.disponivel,
+    required this.solicitado,
+  });
+
+  final String titulo;
+  final int disponivel;
+  final int solicitado;
+
+  @override
+  String toString() {
+    if (disponivel <= 0) {
+      return '"$titulo" está esgotado. Remova-o do carrinho para continuar.';
+    }
+    return 'Estoque insuficiente de "$titulo": $disponivel disponíveis, $solicitado no carrinho.';
   }
 }

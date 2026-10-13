@@ -1,8 +1,7 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:izstock/features/commons/services/location_service.dart';
 import 'package:izstock/features/estoque/models/mercadoria.dart';
 import 'package:izstock/features/vendas/controllers/carrinho/carrinho_state.dart';
+import 'package:izstock/features/vendas/controllers/carrinho/search_mercadoria_controller.dart';
 import 'package:izstock/features/vendas/models/meio_pagamento_enum.dart';
 import 'package:izstock/features/vendas/models/mercadoria_venda.dart';
 import 'package:izstock/features/vendas/models/venda.dart';
@@ -20,75 +19,59 @@ class CarrinhoController extends AsyncNotifier<CarrinhoState> {
   @override
   CarrinhoState build() => const CarrinhoState();
 
+  int? estoqueDisponivel(String mercadoriaId) {
+    return ref
+        .read(mercadoriasProvider)
+        .value
+        ?.where((m) => m.id == mercadoriaId)
+        .firstOrNull
+        ?.quantidade;
+  }
+
+  void _erroEstoque() {
+    state = AsyncData(
+      state.value!.copyWith(
+        mensagemErro: 'Limite de estoque atingido para esta mercadoria',
+        status: CarrinhoStatus.erro,
+      ),
+    );
+  }
+
   void addMercadoriaToCarrinho(Mercadoria mercadoria) {
     final currentList = state.value!.mercadoriaList;
 
     final mercadoriaVenda = currentList
         .where((m) => m.mercadoriaId == mercadoria.id)
         .firstOrNull;
+    final quantidadeNoCarrinho = mercadoriaVenda?.quantidade ?? 0;
+
+    if (quantidadeNoCarrinho >= mercadoria.quantidade) {
+      _erroEstoque();
+      return;
+    }
 
     if (mercadoriaVenda != null) {
-      final hasEstoque = mercadoriaVenda.quantidade < mercadoria.quantidade;
-      if (!hasEstoque) {
-        state = AsyncData(
-          state.value!.copyWith(
-            mensagemErro: 'Limite de estoque atingido para esta mercadoria',
-            status: CarrinhoStatus.erro,
-          ),
-        );
-        return;
-      }
-
-      final index = currentList.indexWhere(
-        (m) => m.mercadoriaId == mercadoria.id,
-      );
-
-      final newList = List<MercadoriaVenda>.from(currentList);
-
-      newList[index] = newList[index].copyWith(
-        quantidade: newList[index].quantidade + 1,
-      );
-
-      state = AsyncData(
-        state.value!.copyWith(
-          mercadoriaList: newList,
-          status: CarrinhoStatus.itemAdicionado,
-        ),
-      );
-    } else {
-      final newMercadoriaVenda = MercadoriaVenda.fromMercadoria(mercadoria);
-
-      state = AsyncData(
-        state.value!.copyWith(
-          mercadoriaList: [...currentList, newMercadoriaVenda],
-          status: CarrinhoStatus.itemAdicionado,
-          cacheMercadoriaList: [
-            ...state.value!.cacheMercadoriaList,
-            mercadoria,
-          ],
-        ),
-      );
+      incrementMercadoria(mercadoriaVenda);
+      return;
     }
+
+    state = AsyncData(
+      state.value!.copyWith(
+        mercadoriaList: [
+          ...currentList,
+          MercadoriaVenda.fromMercadoria(mercadoria),
+        ],
+        status: CarrinhoStatus.itemAdicionado,
+      ),
+    );
   }
 
   void incrementMercadoria(MercadoriaVenda item) {
     final currentList = state.value!.mercadoriaList;
-    final cacheMercadoriaList = state.value!.cacheMercadoriaList;
+    final disponivel = estoqueDisponivel(item.mercadoriaId);
 
-    final hasEstoque =
-        item.quantidade <
-        cacheMercadoriaList
-            .where((m) => m.id == item.mercadoriaId)
-            .first
-            .quantidade;
-
-    if (!hasEstoque) {
-      state = AsyncData(
-        state.value!.copyWith(
-          mensagemErro: 'Limite de estoque atingido para esta mercadoria',
-          status: CarrinhoStatus.erro,
-        ),
-      );
+    if (disponivel != null && item.quantidade >= disponivel) {
+      _erroEstoque();
       return;
     }
 
@@ -150,6 +133,10 @@ class CarrinhoController extends AsyncNotifier<CarrinhoState> {
         status: CarrinhoStatus.itemRemovido,
       ),
     );
+  }
+
+  void limparCarrinho() {
+    state = const AsyncData(CarrinhoState());
   }
 
   void addDesconto(double valor) {
@@ -222,13 +209,24 @@ class CarrinhoController extends AsyncNotifier<CarrinhoState> {
       longitude: long,
     );
 
-    state = await AsyncValue.guard(() async {
-      await vendaRepository.registrarVenda(novaVenda);  
-      return currentState.copyWith(
-        mercadoriaList: [],
-        desconto: 0.0,
-        status: CarrinhoStatus.vendaFinalizada,
+    try {
+      await vendaRepository.registrarVenda(novaVenda);
+      state = AsyncData(
+        currentState.copyWith(
+          mercadoriaList: [],
+          desconto: 0.0,
+          status: CarrinhoStatus.vendaFinalizada,
+        ),
       );
-    });
+    } catch (error) {
+      state = AsyncData(
+        currentState.copyWith(
+          status: CarrinhoStatus.erro,
+          mensagemErro: error is EstoqueInsuficienteException
+              ? error.toString()
+              : 'Não foi possível registrar a venda. Verifique sua conexão e tente novamente.',
+        ),
+      );
+    }
   }
 }
