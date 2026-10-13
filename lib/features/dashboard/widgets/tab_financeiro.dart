@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:izstock/core/styles/theme.dart';
 import 'package:izstock/features/commons/services/formatter_service.dart';
 import 'package:izstock/features/dashboard/widgets/grafico_vendas.dart';
+import 'package:izstock/features/dashboard/widgets/data_resumo_selector.dart';
 import '../controllers/dashboard_controller.dart';
 
 class TabFinanceiro extends ConsumerWidget {
@@ -22,7 +23,7 @@ class TabFinanceiro extends ConsumerWidget {
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 20, 16, 32),
       children: [
-        Text('Hoje', style: sectionStyle),
+        const DataResumoSelector(),
         const SizedBox(height: 12),
         resumoAsync.when(
           loading: () => const LinearProgressIndicator(),

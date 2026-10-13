@@ -6,20 +6,34 @@ import 'package:izstock/features/dashboard/models/resumo_financeiro.dart';
 class DashboardRepository extends BaseRepository {
   DashboardRepository({super.firestore, super.auth});
 
-  Stream<ResumoFinanceiro> getResumoDiarioStream() {
-    final currentDate = DateTime.now();
-    final currentDateFormatted = "${currentDate.year}-${currentDate.month.toString().padLeft(2, '0')}-${currentDate.day.toString().padLeft(2, '0')}";
+  Stream<ResumoFinanceiro> getResumoDiarioStream(DateTime date) {
+    final formattedDate = "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
 
     return firestore
         .collection('users')
         .doc(userId)
         .collection('resumos')
-        .doc(currentDateFormatted)
+        .doc(formattedDate)
         .snapshots()
         .map((doc) {
           final dados = doc.data() ?? {};
           return ResumoFinanceiro.fromMap(dados);
         });
+  }
+
+  Stream<List<ResumoFinanceiro>> getResumosStream() {
+    return firestore
+        .collection('users')
+        .doc(userId)
+        .collection('resumos')
+        .orderBy('data', descending: true)
+        .snapshots()
+        .map(
+          (snapshot) => snapshot.docs
+              .map((doc) => ResumoFinanceiro.fromMap(doc.data()))
+              .where((resumo) => resumo.data != null)
+              .toList(),
+        );
   }
 
   Stream<List<Map<String, dynamic>>> getHistoricoVendasStream() {
